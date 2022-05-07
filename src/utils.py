@@ -18,7 +18,7 @@ def prepare_data(
     n: int = 7,
     test_size: float = 0.1,
 ):
-    if isinstance(str):
+    if isinstance(data_or_filename, str):
         data = load_csv(data_or_filename)
 
     contexted_data = prepare_context(
@@ -38,7 +38,7 @@ def prepare_context(
     data: pd.DataFrame,
     filter_by: str = None,
     filter_value: str = None,
-    content_key="content",
+    content_key: str = "content",
     n: int = 7,
 ):
     if filter_by:
@@ -73,6 +73,6 @@ def build_args(default_args: Dict):
             parser.add_argument(flag, action="store_true", default=val)
             continue
 
-        parser.add_argument(flag, type=type(val), default=val)
+        parser.add_argument(flag, default=val)
 
     return parser.parse_args()
