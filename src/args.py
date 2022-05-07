@@ -1,6 +1,6 @@
 class Args:
     def __init__(self):
-        self.output_dir = "charlottebot-small"
+        self.output_dir = "output-small"
         self.model_type = "gpt2"
         self.model_name_or_path = "microsoft/DialoGPT-small"
         self.config_name = "microsoft/DialoGPT-small"
@@ -32,6 +32,9 @@ class Args:
         self.local_rank = -1
         self.fp16 = False
         self.fp16_opt_level = "O1"
+        self.data_filename = "../data/processed.csv"
+        self.filter_by = None
+        self.filter_value = None
 
 
 args = Args()

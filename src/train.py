@@ -1,3 +1,4 @@
+import argparse
 import glob
 import logging
 import os
@@ -26,8 +27,8 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 
-from src.args import Args
-from src.dataset import ConversationDataset
+from dataset import ConversationDataset
+from utils import prepare_data
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -39,7 +40,6 @@ logger = logging.getLogger(__name__)
 
 MODEL_CONFIG_CLASSES = list(MODEL_WITH_LM_HEAD_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
-
 
 # Cacheing and storing of data/checkpoints
 
@@ -462,8 +462,11 @@ def evaluate(
     return result
 
 
-def main(df_trn, df_val):
-    args = Args()
+def run(args):
+    prepared_data = prepare_data(args.data_filename, args.filter_by, args.filter_value)
+
+    df_trn = prepared_data["train"]
+    df_val = prepared_data["validation"]
 
     if args.should_continue:
         sorted_checkpoints = _sorted_checkpoints(args)
