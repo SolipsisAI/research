@@ -1,8 +1,8 @@
-from typing import Union
-from urllib import response
+import argparse
+
+from typing import Dict, Union
 
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
 
 
@@ -60,3 +60,19 @@ def prepare_context(
 
     df = pd.DataFrame.from_records(contexted, columns=columns)
     return df
+
+
+def build_args(default_args: Dict):
+    parser = argparse.ArgumentParser()
+
+    for arg, val in default_args.items():
+        val_type = type(val)
+        flag = f"--{arg}"
+
+        if val_type == bool:
+            parser.add_argument(flag, action="store_true", default=val)
+            continue
+
+        parser.add_argument(flag, type=type(val), default=val)
+
+    return parser.parse_args()
