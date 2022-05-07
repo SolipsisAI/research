@@ -22,7 +22,7 @@ from transformers import (
 logger = logging.getLogger(__name__)
 
 
-def construct_conv(row, tokenizer, eos = True):
+def construct_conv(row, tokenizer, eos=True):
     flatten = lambda l: [item for sublist in l for item in sublist]
     conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row]))
     conv = flatten(conv)
@@ -32,7 +32,9 @@ def construct_conv(row, tokenizer, eos = True):
 class ConversationDataset(Dataset):
     def __init__(self, tokenizer: PreTrainedTokenizer, args, df, block_size=512):
 
-        block_size = block_size - (tokenizer.model_max_length - tokenizer.max_len_single_sentence)
+        block_size = block_size - (
+            tokenizer.model_max_length - tokenizer.max_len_single_sentence
+        )
 
         directory = args.cache_dir
         cached_features_file = os.path.join(
