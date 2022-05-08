@@ -1,9 +1,12 @@
 import argparse
+import tarfile
+import os.path
 
 from typing import Dict, Union
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from transformers import AutoModelWithLMHead, AutoTokenizer
 
 
 def load_csv(filename):
@@ -76,3 +79,17 @@ def build_args(default_args: Dict):
         parser.add_argument(flag, default=val)
 
     return parser.parse_args()
+
+
+def export_model(model_path, output_path):
+    model = AutoModelWithLMHead.from_pretrained(model_path)
+    model.save_pretrained(output_path)
+    tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
+    tokenizer.save_pretrained(output_path)
+    make_tarfile(f"{output_path}.tar.gz", output_path)
+    print(f"Saved to {output_path}")
+
+
+def make_tarfile(output_filename, source_dir):
+    with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
