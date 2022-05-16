@@ -1,3 +1,7 @@
+import argparse
+
+from typing import List, Dict, Union, Tuple
+
 import torch, os, re, pandas as pd, json
 from sklearn.model_selection import train_test_split
 from transformers import (
@@ -12,6 +16,8 @@ from transformers import (
     AutoModelForCausalLM
 )
 from datasets import Dataset, list_metrics, load_metric
+
+from src.args import Args
 
 
 def prepare_data(
@@ -136,11 +142,19 @@ def chat(model, tokenizer):
         print(f"Bot: {response}")
 
 
-def train():
-    MODEL_NAME = "microsoft/DialoGPT-small"
+def train(
+    base_model_name: str,
+    data_filepath: str,
+    output_dir: str,
+    training_args,
+    filter_by: str = None,
+    filter_value: str = None,
+    data_columns: List[str] = None,
+):
     model_cls = AutoModelForCausalLM
     tokenizer_cls = AutoTokenizer
     
+    # Test device
     if torch.cuda.is_available():  
         dev = "cuda:0" 
     else:  
@@ -155,32 +169,40 @@ def train():
     """)
     
     # Load Config
-    config = AutoConfig.from_pretrained(MODEL_NAME)
+    config = AutoConfig.from_pretrained(base_model_name)
     
     # Load data
-    filepath = "../data/processed.csv"
-    df = pd.read_csv(filepath, encoding="utf-8", usecols=["character", "content"]).rename(columns={"content": "text"})
+    if data_columns is None:
+        data_columns = ["character", "content"]
+    df = pd.read_csv(
+            data_filepath,
+            encoding="utf-8",
+            usecols=data_columns,
+        ).rename(columns={"content": "text"})
     
     # Setup tokenizer
-    base_tokenizer = tokenizer_cls.from_pretrained(MODEL_NAME)
+    base_tokenizer = tokenizer_cls.from_pretrained(base_model_name)
     base_tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     
     # Setup base model
-    base_model = model_cls.from_pretrained(MODEL_NAME, config=config)
+    base_model = model_cls.from_pretrained(base_model_name, config=config)
     base_model.resize_token_embeddings(len(base_tokenizer))
     
     # Preprocess data
-    train_df, val_df = prepare_data(df, filter_by="character", filter_value="bitjockey")
+    train_df, val_df = prepare_data(df, filter_by=filter_by, filter_value=filter_value)
     
     train_dataset = Dataset.from_pandas(train_df)
     val_dataset = Dataset.from_pandas(val_df)
-    tokenized_train_dataset = train_dataset.map(preprocess_function(tokenizer=base_tokenizer, max_length=256), remove_columns=list(train_dataset.features.keys()))
-    tokenized_val_dataset = val_dataset.map(preprocess_function(tokenizer=base_tokenizer, max_length=256), remove_columns=list(val_dataset.features.keys()))
+    tokenized_train_dataset = train_dataset.map(
+        preprocess_function(tokenizer=base_tokenizer, max_length=256),
+        remove_columns=list(train_dataset.features.keys()))
+    tokenized_val_dataset = val_dataset.map(
+        preprocess_function(tokenizer=base_tokenizer, max_length=256), 
+        remove_columns=list(val_dataset.features.keys()))
     
     # Convert to tensors
     tokenized_train_dataset.set_format(type="torch", columns=["input_ids"])
     tokenized_val_dataset.set_format(type="torch", columns=["input_ids"])
-    FINETUNED_MODEL = 'CHARLOTTE-05162022a-myDialoGPT2-small'
 
     # Initialize data collator
     data_collator = DataCollatorForLanguageModeling(
@@ -193,13 +215,13 @@ def train():
     trainer = None
     training_args = None
     training_args = TrainingArguments(
-        output_dir=FINETUNED_MODEL,          # output directory
+        output_dir=output_dir,          # output directory
         evaluation_strategy="epoch",
         num_train_epochs=3,           # total # of training epochs
         per_device_train_batch_size=2,  # batch size per device during training
         per_device_eval_batch_size=2,   # batch size for evaluation
         weight_decay=0.01,           # strength of weight decay
-        logging_dir=FINETUNED_MODEL,            # directory for storing logs
+        logging_dir=output_dir,            # directory for storing logs
         prediction_loss_only=True,
     )
     
@@ -218,19 +240,60 @@ def train():
     print("Training completed")
     
     # Save model, tokenizer, and config
-    trainer.save_model(FINETUNED_MODEL)
-    base_tokenizer.save_pretrained(FINETUNED_MODEL)
-    config.save_pretrained(FINETUNED_MODEL)
+    trainer.save_model(output_dir)
+    base_tokenizer.save_pretrained(output_dir)
+    config.save_pretrained(output_dir)
     
     print("Run the code below in a Jupyter cell") 
     print(
         f"""
         from transformers import AutoModelForCausalLM, AutoTokenizer
         
-        finetuned_model = AutoModelForCausalLM.from_pretrained({FINETUNED_MODEL})
-        tokenizer = AutoTokenizer.from_pretrained({FINETUNED_MODEL})
+        finetuned_model = AutoModelForCausalLM.from_pretrained({output_dir})
+        tokenizer = AutoTokenizer.from_pretrained({output_dir})
         
         # Start the chat
         chat(finetuned_model, tokenizer)
         """
+    )
+    
+    
+def build_args(default_args: Dict):
+    parser = argparse.ArgumentParser()
+
+    for arg, val in default_args.items():
+        val_type = type(val)
+        flag = f"--{arg}"
+
+        if val_type == bool:
+            parser.add_argument(flag, action="store_true", default=val)
+            continue
+
+        parser.add_argument(flag, default=val)
+
+    return parser.parse_args()
+    
+    
+def main():
+    default_args = Args().__dict__
+    args = build_args(default_args)
+    
+    training_args = TrainingArguments(
+        output_dir=args.output_dir,          # output directory
+        evaluation_strategy="epoch",
+        num_train_epochs=args.epochs,           # total # of training epochs
+        per_device_train_batch_size=args.batch_size,  # batch size per device during training
+        per_device_eval_batch_size=args.batch_size,   # batch size for evaluation
+        weight_decay=0.01,           # strength of weight decay
+        logging_dir=args.output_dir,            # directory for storing logs
+        prediction_loss_only=True,
+    )
+ 
+    train(
+        args.base_model_name,
+        args.data_filepath,
+        args.output_dir,
+        training_args,
+        args.filter_by,
+        args.filter_value,
     )
