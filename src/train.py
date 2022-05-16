@@ -212,19 +212,6 @@ def train(
     )
 
     # Setup trainer
-    trainer = None
-    training_args = None
-    training_args = TrainingArguments(
-        output_dir=output_dir,          # output directory
-        evaluation_strategy="epoch",
-        num_train_epochs=3,           # total # of training epochs
-        per_device_train_batch_size=2,  # batch size per device during training
-        per_device_eval_batch_size=2,   # batch size for evaluation
-        weight_decay=0.01,           # strength of weight decay
-        logging_dir=output_dir,            # directory for storing logs
-        prediction_loss_only=True,
-    )
-    
     trainer = Trainer(
         model=base_model,
         args=training_args,
@@ -274,10 +261,7 @@ def build_args(default_args: Dict):
     return parser.parse_args()
     
     
-def main():
-    default_args = Args().__dict__
-    args = build_args(default_args)
-    
+def main(args):
     training_args = TrainingArguments(
         output_dir=args.output_dir,          # output directory
         evaluation_strategy="epoch",
@@ -297,3 +281,10 @@ def main():
         args.filter_by,
         args.filter_value,
     )
+    
+    
+if __name__ == "__main__":
+    default_args = Args().__dict__
+    args = build_args(default_args)
+    
+    main(args)
