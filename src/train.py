@@ -15,7 +15,7 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM
 )
-from datasets import Dataset, list_metrics, load_metric
+from datasets import Dataset, DatasetDict, list_metrics, load_metric, load_from_disk
 
 from src.args import Args
 
@@ -38,7 +38,7 @@ def prepare_data(
         n=n,
     )
 
-    trn_df, val_df = train_test_split(contexted_data, test_size=test_size, shuffle=False)
+    trn_df, val_df = train_test_split(contexted_data, test_size=test_size, shuffle=True)
     
     return trn_df, val_df
 
@@ -146,6 +146,7 @@ def train(
     base_model_name: str,
     data_filepath: str,
     output_dir: str,
+    data_dir: str,
     training_args,
     filter_by: str = None,
     filter_value: str = None,
@@ -203,6 +204,11 @@ def train(
     # Convert to tensors
     tokenized_train_dataset.set_format(type="torch", columns=["input_ids"])
     tokenized_val_dataset.set_format(type="torch", columns=["input_ids"])
+    tokenized_dataset = DatasetDict({
+        "train": tokenized_train_dataset,
+        "validation": tokenized_val_dataset,
+    })
+    tokenized_dataset.save_to_disk(data_dir)
 
     # Initialize data collator
     data_collator = DataCollatorForLanguageModeling(
@@ -277,6 +283,7 @@ def main(args):
         args.base_model_name,
         args.data_filepath,
         args.output_dir,
+        args.data_dir,
         training_args,
         args.filter_by,
         args.filter_value,
