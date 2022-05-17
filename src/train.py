@@ -18,7 +18,7 @@ from transformers import (
 from datasets import Dataset, DatasetDict, list_metrics, load_metric, load_from_disk
 
 from src.args import Args
-from src.datasets import load_and_preprocess_datasets
+from src.dataset import load_and_preprocess_datasets
 
 
 def compute_metrics(eval_pred):
@@ -34,9 +34,6 @@ def train(
     preprocessed_datasets: DatasetDict,
     training_args: TrainingArguments,
 ): 
-    # Load Config
-    config = AutoConfig.from_pretrained(base_model)
-    
     # Initialize data collator
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
@@ -115,7 +112,8 @@ def main(args):
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     
     # Setup base model
-    base_model = AutoModelForCausalLM.from_pretrained(base_model, config=config)
+    config = AutoConfig.from_pretrained(base_model)
+    base_model = AutoModelForCausalLM.from_pretrained(args.base_model, config=config)
     base_model.resize_token_embeddings(len(base_tokenizer))
  
     train(

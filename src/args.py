@@ -2,7 +2,7 @@ class Args:
     def __init__(self):
         self.output_dir = None
         self.data_dir = None
-        self.base_model_name = None
+        self.base_model = None
         self.filter_by = None
         self.filter_value = None
         self.batch_size = 2
