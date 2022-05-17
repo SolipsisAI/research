@@ -1,9 +1,8 @@
 class Args:
     def __init__(self):
-        self.output_dir = "output-small"
-        self.data_dir = "output-small-dataset"
-        self.base_model_name = "microsoft/DialoGPT-small"
-        self.data_filepath = "../data/processed.csv"
+        self.output_dir = None
+        self.data_dir = None
+        self.base_model_name = None
         self.filter_by = None
         self.filter_value = None
         self.batch_size = 2
