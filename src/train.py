@@ -50,7 +50,7 @@ def train(
         model=base_model,
         args=training_args,
         train_dataset=train_dataset,
-        eval_dataset=eval_datasets,
+        eval_dataset=eval_dataset,
         compute_metrics=compute_metrics,
         data_collator=data_collator,
     )
@@ -108,13 +108,15 @@ def main(args):
     )
     
     # Setup tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(base_model)
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model)
     tokenizer.add_special_tokens({'pad_token': '[PAD]'})
     
     # Setup base model
-    config = AutoConfig.from_pretrained(base_model)
+    config = AutoConfig.from_pretrained(args.base_model)
     base_model = AutoModelForCausalLM.from_pretrained(args.base_model, config=config)
-    base_model.resize_token_embeddings(len(base_tokenizer))
+    base_model.resize_token_embeddings(len(tokenizer))
+    
+    preprocessed_datasets = load_and_preprocess_datasets(args.data_dir, tokenizer)
  
     train(
         base_model=base_model,
