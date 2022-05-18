@@ -52,6 +52,8 @@ def prepare_context(
     contexted = []
 
     for i in indexes:
+        if i < n:
+            continue
         row = []
         prev = i - 1 - n
         for j in range(i, prev, -1):
