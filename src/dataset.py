@@ -1,3 +1,4 @@
+from typing import List
 from pathlib import Path
 
 import pandas as pd
@@ -22,22 +23,82 @@ def load_data(data_dir):
     data_filepaths = find_data_filepaths(data_dir)
     for data_filepath in data_filepaths:
         data_name = data_filepath.stem
-        data[data_name] = pd.read_csv(data_filepath, encoding="utf-8", on_bad_lines='skip')
+        data[data_name] = pd.read_csv(
+            data_filepath, encoding="utf-8", on_bad_lines="skip"
+        )
     return data
 
 
-def create_datasets(data, eos_token="<|endofsentence|>"):
+def create_datasets(
+    data,
+    source_columns: List[str] = None,
+    text_column: str = None,
+    group_column: str = None,
+    filter_by: str = None,
+    eos_token="<|endofsentence|>",
+    n: int = 7,
+):
+    if filter_by:
+        filter_key, filter_value = filter_by.split(":=")
+
+    should_group = bool(group_column)
+
     datasets = {}
+
     for name, df in data.items():
-        grouped = df[["conv_id", "prompt", "utterance"]].groupby("conv_id")["utterance"]
-        concat_text = grouped.transform(lambda x: eos_token.join(x))
-        datasets[name] = Dataset.from_dict({"text": concat_text.unique()})
+        if should_group:
+            _data = df[source_columns].groupby(group_column)[text_column]
+            concat_text = _data.transform(lambda x: eos_token.join(x)).unique()
+        else:
+            _data = prepare_context(
+                data=df,
+                filter_by=filter_key,
+                filter_value=filter_value,
+                content_key=text_column,
+                n=n,
+            )
+
+        datasets[name] = Dataset.from_dict({"text": concat_text})
     return datasets
 
 
-def preprocess_function(tokenizer, text_column="text", max_length=256):  
+def prepare_context(
+    data: pd.DataFrame,
+    filter_by: str = None,
+    filter_value: str = None,
+    content_key: str = "text",
+    n: int = 7,
+):
+    if filter_by:
+        indexes = data.loc[data[filter_by] == filter_value].index
+        for idx, i in enumerate(indexes):
+            if i > n:
+                break
+        indexes = indexes[idx:]
+    else:
+        indexes = range(n, len(data[content_key]))
+
+    contexted = []
+
+    for i in indexes:
+        row = []
+        prev = i - 1 - n
+        for j in range(i, prev, -1):
+            row.append(data.iloc[j][content_key])
+        contexted.append(row)
+
+    columns = ["response", "context"]
+    columns = columns + ["context/" + str(i) for i in range(n - 1)]
+
+    print(columns)
+    df = pd.DataFrame.from_records(contexted, columns=columns)
+
+    return df
+
+
+def preprocess_function(tokenizer, text_column="text", max_length=256):
     def _tokenize(examples):
-        flatten = lambda l: [item for sublist in l for item in sublist] 
+        flatten = lambda l: [item for sublist in l for item in sublist]
         sanitized_text = [v.replace("_comma_", ",") for k, v in examples.items()]
         tokenized = tokenizer(
             sanitized_text,
@@ -47,19 +108,20 @@ def preprocess_function(tokenizer, text_column="text", max_length=256):
         )
         examples["input_ids"] = flatten(tokenized["input_ids"])
         return examples
+
     return _tokenize
 
 
 def preprocess_datasets(datasets, tokenizer, text_column="text", max_length=256):
     columns = lambda d: d.features.keys()
     preprocessed_datasets = {}
-    
+
     for name, dataset in datasets.items():
         ds = dataset.map(
             preprocess_function(tokenizer, text_column, max_length),
-            remove_columns=columns(dataset)
+            remove_columns=columns(dataset),
         )
         ds.set_format(type="torch", columns=["input_ids"])
         preprocessed_datasets[name] = ds
-        
+
     return preprocessed_datasets
