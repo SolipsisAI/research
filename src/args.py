@@ -7,6 +7,6 @@ class Args:
         self.weight_decay = 0.01,
         self.logging_dir = self.output_dir
         self.prediction_loss_only = True
-        self.epochs = 3
+        self.epochs = 1
 
 args = Args()

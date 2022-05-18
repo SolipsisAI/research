@@ -43,6 +43,7 @@ def preprocess_function(tokenizer, text_column="text", max_length=256):
             sanitized_text,
             padding="max_length",
             max_length=max_length,
+            truncation=True,
         )
         examples["input_ids"] = flatten(tokenized["input_ids"])
         return examples

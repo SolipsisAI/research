@@ -42,8 +42,8 @@ def train(
     )
     
     # Datasets
-    train_dataset = preprocessed_datasets["test"]
-    eval_dataset = preprocessed_datasets["valid"]
+    train_dataset = preprocessed_datasets["valid"]
+    eval_dataset = preprocessed_datasets["test"]
     
     # Setup trainer
     trainer = Trainer(
