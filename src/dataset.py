@@ -22,7 +22,7 @@ def find_data_filepaths(data_dir):
 def load_data(data_dir_or_filepath):
     if Path(data_dir_or_filepath).is_file():
         return pd.read_csv(data_dir_or_filepath)
-    
+
     data_dir = data_dir_or_filepath
 
     data = {}

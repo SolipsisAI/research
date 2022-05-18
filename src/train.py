@@ -81,7 +81,7 @@ def train(
     )
 
 
-def main(args, training_args): 
+def main(args, training_args):
     # Setup tokenizer
     tokenizer = AutoTokenizer.from_pretrained(args.base_model)
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
@@ -113,5 +113,5 @@ if __name__ == "__main__":
     arg_builder = ArgBuilder()
     args = arg_builder.build_and_parse()
     arg_builder.set_training_args(args)
-    
+
     main(args, arg_builder.training_args)
