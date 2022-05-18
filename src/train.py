@@ -20,7 +20,7 @@ from transformers import (
     WEIGHTS_NAME,
     AdamW,
     AutoConfig,
-    AutoModelWithLMHead,
+    AutoModelForCausalLM,
     AutoTokenizer,
     PreTrainedModel,
     PreTrainedTokenizer,
@@ -517,7 +517,7 @@ def run(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name, cache_dir=args.cache_dir
     )
-    model = AutoModelWithLMHead.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         from_tf=False,
         config=config,
@@ -554,7 +554,7 @@ def run(args):
         torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
 
         # Load a trained model and vocabulary that you have fine-tuned
-        model = AutoModelWithLMHead.from_pretrained(args.output_dir)
+        model = AutoModelForCausalLM.from_pretrained(args.output_dir)
         tokenizer = AutoTokenizer.from_pretrained(args.output_dir)
         model.to(args.device)
 
@@ -579,7 +579,7 @@ def run(args):
                 checkpoint.split("/")[-1] if checkpoint.find("checkpoint") != -1 else ""
             )
 
-            model = AutoModelWithLMHead.from_pretrained(checkpoint)
+            model = AutoModelForCausalLM.from_pretrained(checkpoint)
             model.to(args.device)
             result = evaluate(args, model, tokenizer, df_trn, df_val, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
