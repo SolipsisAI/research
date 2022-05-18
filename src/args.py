@@ -5,11 +5,12 @@ from copy import copy
 from transformers import TrainingArguments
 
 
-class Args:
+class ArgBuilder:
     def __init__(self, required=None):
         if required is None:
             required = ["output_dir", "data_dir", "base_model", "text_column"]
         self._required = required
+        self._parser = argparse.ArgumentParser()
         self.data_dir = None
         self.data_filepath = None
         self.base_model = None
@@ -22,17 +23,16 @@ class Args:
         return self.training_args
 
     def build(self):
-        parser = argparse.ArgumentParser()
-
         run_args = copy(self.__dict__)
         training_args = run_args.pop("_training_args", TrainingArguments(output_dir="an/example/here").__dict__) 
         
         for args in [run_args, training_args]:
-            parser = self._build_args(parser, args)
-        
-        return parser.parse_args()
+            self._build_args(args)
+            
+    def parse(self): 
+        return self._parser.parse_args()
     
-    def _build_args(self, parser, args, skip=None):
+    def _build_args(self, args, skip=None):
         for arg, val in args.items():
             val_type = type(val)
             params = {"default": val, "type": val_type}
@@ -48,6 +48,12 @@ class Args:
                 params["action"] = "store_true"
                 params.pop("type")
 
-            parser.add_argument(f"--{arg}", **params)
+            self._parser.add_argument(f"--{arg}", **params)
         
-        return parser
+        return self._parser
+    
+    def set_training_args(self, **args):
+        for arg, val in args.items():
+            if arg in self.training_args.__dict__:
+                setattr(self.training_args, arg, val)
+
