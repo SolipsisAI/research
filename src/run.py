@@ -1,11 +1,11 @@
 import argparse
 
-from train import run
-from args import Args
-from utils import build_args
+from src.train import run
+from src.args import Args
+from src.utils import build_args
 
 
-if __name__ == "__main__":
+def main():
     default_args = Args().__dict__
     args = build_args(default_args)
     run(args)
