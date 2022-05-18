@@ -58,12 +58,7 @@ def create_datasets(
 
     for name, df in data.items():
         if should_group:
-            _data = (
-                df[[group_column, text_column]]
-                .groupby(group_column)[text_column]
-                .transform(lambda x: eos_token.join(x))
-                .unique()
-            )
+            concat_text = df[[group_column, text_column]].groupby(group_column)[text_column].transform(lambda x: eos_token.join(x)).unique()
         else:
             _data = prepare_context(
                 data=df,
@@ -72,7 +67,8 @@ def create_datasets(
                 content_key=text_column,
                 n=n,
             )
-
+            concat_text = _data["text"]
+            
         datasets[name] = Dataset.from_dict({"text": concat_text})
 
     return datasets
@@ -104,7 +100,7 @@ def prepare_context(
             row.append(data.iloc[j][text_column])
         concat_text = eos_token.join(reversed(row))
         contexted.append([concat_text])
-
+        
     columns = ["text"]
     df = pd.DataFrame.from_records(contexted, columns=columns)
 
