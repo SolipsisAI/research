@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
+
 setup(
     name="src",
     version="0.1.0",
@@ -7,7 +8,7 @@ setup(
     install_requires=[
         "tensorboard",
     ],
-    entry_points = {
-        'console_scripts': ['trainer=src.run:main'],
-    }
+    entry_points={
+        "console_scripts": ["trainer=src.run:main"],
+    },
 )
