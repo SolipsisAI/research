@@ -43,8 +43,6 @@ class ConversationDataset(Dataset):
             self.examples = []
             for _, row in df.iterrows():
                 conv = construct_conv(row, tokenizer)
-                if len(conv) > block_size:
-                    continue
                 self.examples.append(conv)
 
             logger.info("Saving features into cached file %s", cached_features_file)

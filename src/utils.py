@@ -21,11 +21,8 @@ def prepare_data(
     n: int = 7,
     test_size: float = 0.1,
 ):
-    data = (
-        data_or_filename
-        if isinstance(data_or_filename, pd.DataFrame)
-        else load_csv(data_or_filename)
-    )
+    if isinstance(data_or_filename, str):
+        data = load_csv(data_or_filename)
 
     contexted_data = prepare_context(
         data,
@@ -55,8 +52,6 @@ def prepare_context(
     contexted = []
 
     for i in indexes:
-        if i < n:
-            continue
         row = []
         prev = i - 1 - n
         for j in range(i, prev, -1):
