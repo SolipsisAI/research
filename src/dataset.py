@@ -6,9 +6,9 @@ import pandas as pd
 from datasets import Dataset, DatasetDict, list_metrics, load_metric, load_from_disk
 
 
-def load_and_preprocess_datasets(data_dir, tokenizer):
+def load_and_preprocess_datasets(data_dir, tokenizer, **kwargs):
     data = load_data(data_dir)
-    datasets = create_datasets(data)
+    datasets = create_datasets(data, **kwargs)
     preprocessed_datasets = preprocess_datasets(datasets, tokenizer)
     return DatasetDict(preprocessed_datasets)
 
@@ -31,7 +31,6 @@ def load_data(data_dir):
 
 def create_datasets(
     data,
-    source_columns: List[str] = None,
     text_column: str = None,
     group_column: str = None,
     filter_by: str = None,
@@ -47,7 +46,7 @@ def create_datasets(
 
     for name, df in data.items():
         if should_group:
-            _data = df[source_columns].groupby(group_column)[text_column]
+            _data = df[[group_column, text_column]].groupby(group_column)[text_column]
             concat_text = _data.transform(lambda x: eos_token.join(x)).unique()
         else:
             _data = prepare_context(

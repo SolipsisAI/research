@@ -32,6 +32,7 @@ def train(
     base_model,
     tokenizer,
     output_dir,
+    config,
     preprocessed_datasets: DatasetDict,
     training_args: TrainingArguments,
 ):
@@ -117,12 +118,19 @@ def main(args):
     base_model = AutoModelForCausalLM.from_pretrained(args.base_model, config=config)
     base_model.resize_token_embeddings(len(tokenizer))
 
-    preprocessed_datasets = load_and_preprocess_datasets(args.data_dir, tokenizer)
+    preprocessed_datasets = load_and_preprocess_datasets(
+        data_dir=args.data_dir,
+        tokenizer=tokenizer,
+        text_column=args.text_column,
+        group_column=args.group_column,
+        filter_by=args.filter_by,
+    )
 
     train(
         base_model=base_model,
         output_dir=args.output_dir,
         tokenizer=tokenizer,
+        config=config,
         preprocessed_datasets=preprocessed_datasets,
         training_args=training_args,
     )
