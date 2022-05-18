@@ -22,6 +22,8 @@ def find_data_filepaths(data_dir):
 def load_data(data_dir_or_filepath):
     if Path(data_dir_or_filepath).is_file():
         return pd.read_csv(data_dir_or_filepath)
+    
+    data_dir = data_dir_or_filepath
 
     data = {}
     data_filepaths = find_data_filepaths(data_dir)
@@ -118,7 +120,7 @@ def prepare_context(
     return df
 
 
-def preprocess_function(tokenizer, text_column="text", max_length=256):
+def preprocess_function(tokenizer, text_column="text", max_length=512):
     def _tokenize(examples):
         flatten = lambda l: [item for sublist in l for item in sublist]
         sanitized_text = [v.replace("_comma_", ",") for k, v in examples.items()]

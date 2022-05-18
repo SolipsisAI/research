@@ -119,7 +119,7 @@ def main(args):
     base_model.resize_token_embeddings(len(tokenizer))
 
     preprocessed_datasets = load_and_preprocess_datasets(
-        data_dir=args.data_dir,
+        data_dir_or_filepath=args.data_dir or args.data_filepath,
         tokenizer=tokenizer,
         text_column=args.text_column,
         group_column=args.group_column,
