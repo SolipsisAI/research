@@ -7,9 +7,9 @@ from sklearn.model_selection import train_test_split
 from datasets import Dataset, DatasetDict, list_metrics, load_metric, load_from_disk
 
 
-def load_and_preprocess_datasets(data_dir, tokenizer, **kwargs):
-    data = load_data(data_dir)
-    datasets = create_datasets(data, **kwargs)
+def load_and_preprocess_datasets(data_dir_or_filepath, tokenizer, **kwargs):
+    data = load_data(data_dir_or_filepath)
+    datasets = create_datasets(data, tokenizer, **kwargs)
     preprocessed_datasets = preprocess_datasets(datasets, tokenizer)
     return DatasetDict(preprocessed_datasets)
 
@@ -19,7 +19,10 @@ def find_data_filepaths(data_dir):
     return data_filepaths
 
 
-def load_data(data_dir):
+def load_data(data_dir_or_filepath):
+    if Path(data_dir_or_filepath).is_file():
+        return pd.read_csv(data_dir_or_filepath)
+
     data = {}
     data_filepaths = find_data_filepaths(data_dir)
     for data_filepath in data_filepaths:
@@ -32,13 +35,15 @@ def load_data(data_dir):
 
 def create_datasets(
     data,
+    tokenizer,
     text_column: str = None,
     group_column: str = None,
     filter_by: str = None,
-    eos_token="<|endofsentence|>",
     n: int = 7,
     test_size: float = 0.1,
 ):
+    eos_token = tokenizer.eos_token
+
     filter_key = None
     filter_value = None
 
@@ -69,7 +74,8 @@ def create_datasets(
                 data=df,
                 filter_by=filter_key,
                 filter_value=filter_value,
-                content_key=text_column,
+                text_column=text_column,
+                eos_token=eos_token,
                 n=n,
             )
             concat_text = _data["text"]
