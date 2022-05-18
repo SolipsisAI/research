@@ -9,6 +9,9 @@ setup(
         "tensorboard",
     ],
     entry_points={
-        "console_scripts": ["trainer=src.run:main"],
+        "console_scripts": [
+            "trainer=src.run:main",
+            "chat-test=src.chat:main",
+        ],
     },
 )

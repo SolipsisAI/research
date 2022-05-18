@@ -58,11 +58,11 @@ def chat(model, tokenizer):
         print(f"Bot: {response}")
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name", "-m")
-    parser.add_argument("--tokenizer", "-t")
+    parser.add_argument("--model_name", "-m", required=True)
+    parser.add_argument("--tokenizer", "-t", required=True)
 
     args = parser.parse_args()
 
