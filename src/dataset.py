@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Union
 from pathlib import Path
 
 import pandas as pd
 
+from sklearn.model_selection import train_test_split
 from datasets import Dataset, DatasetDict, list_metrics, load_metric, load_from_disk
 
 
@@ -36,7 +37,11 @@ def create_datasets(
     filter_by: str = None,
     eos_token="<|endofsentence|>",
     n: int = 7,
+    test_size: float = 0.1,
 ):
+    filter_key = None
+    filter_value = None
+
     if filter_by:
         filter_key, filter_value = filter_by.split(":=")
 
@@ -44,10 +49,21 @@ def create_datasets(
 
     datasets = {}
 
+    if isinstance(data, pd.DataFrame):
+        trn_df, val_df = train_test_split(data, test_size=test_size, shuffle=False)
+        data = {
+            "train": trn_df,
+            "valid": val_df,
+        }
+
     for name, df in data.items():
         if should_group:
-            _data = df[[group_column, text_column]].groupby(group_column)[text_column]
-            concat_text = _data.transform(lambda x: eos_token.join(x)).unique()
+            _data = (
+                df[[group_column, text_column]]
+                .groupby(group_column)[text_column]
+                .transform(lambda x: eos_token.join(x))
+                .unique()
+            )
         else:
             _data = prepare_context(
                 data=df,
@@ -58,6 +74,7 @@ def create_datasets(
             )
 
         datasets[name] = Dataset.from_dict({"text": concat_text})
+
     return datasets
 
 
@@ -65,7 +82,8 @@ def prepare_context(
     data: pd.DataFrame,
     filter_by: str = None,
     filter_value: str = None,
-    content_key: str = "text",
+    text_column: str = "text",
+    eos_token: str = "<|endofsentence|>",
     n: int = 7,
 ):
     if filter_by:
@@ -75,7 +93,7 @@ def prepare_context(
                 break
         indexes = indexes[idx:]
     else:
-        indexes = range(n, len(data[content_key]))
+        indexes = range(n, len(data[text_column]))
 
     contexted = []
 
@@ -83,13 +101,11 @@ def prepare_context(
         row = []
         prev = i - 1 - n
         for j in range(i, prev, -1):
-            row.append(data.iloc[j][content_key])
-        contexted.append(row)
+            row.append(data.iloc[j][text_column])
+        concat_text = eos_token.join(reversed(row))
+        contexted.append([concat_text])
 
-    columns = ["response", "context"]
-    columns = columns + ["context/" + str(i) for i in range(n - 1)]
-
-    print(columns)
+    columns = ["text"]
     df = pd.DataFrame.from_records(contexted, columns=columns)
 
     return df
