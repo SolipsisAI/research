@@ -7,4 +7,7 @@ setup(
     install_requires=[
         "tensorboard",
     ],
+    entry_points = {
+        'console_scripts': ['trainer=src.run:main'],
+    }
 )

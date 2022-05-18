@@ -27,8 +27,8 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 
-from dataset import ConversationDataset
-from utils import prepare_data
+from src.dataset import ConversationDataset
+from src.utils import prepare_data
 
 try:
     from torch.utils.tensorboard import SummaryWriter
