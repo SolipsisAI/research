@@ -21,6 +21,10 @@ class ArgBuilder:
 
     def for_training(self):
         return self.training_args
+    
+    def build_and_parse(self):
+        self.build()
+        return self.parse()
 
     def build(self):
         run_args = copy(self.__dict__)
@@ -35,25 +39,23 @@ class ArgBuilder:
     def _build_args(self, args, skip=None):
         for arg, val in args.items():
             val_type = type(val)
-            params = {"default": val, "type": val_type}
+            options = {"default": val}
             
             if arg.startswith("_"):
                 continue
             
             if arg in self._required:
-                params["required"] = True
-                params.pop("default")
+                options["required"] = True
+                options.pop("default")
 
             if val_type == bool:
-                params["action"] = "store_true"
-                params.pop("type")
+                options["action"] = "store_true"
 
-            self._parser.add_argument(f"--{arg}", **params)
+            self._parser.add_argument(f"--{arg}", **options)
         
         return self._parser
     
-    def set_training_args(self, **args):
-        for arg, val in args.items():
+    def set_training_args(self, args): 
+        for arg, val in args.__dict__.items():
             if arg in self.training_args.__dict__:
                 setattr(self.training_args, arg, val)
-

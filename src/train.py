@@ -17,7 +17,7 @@ from transformers import (
 )
 from datasets import Dataset, DatasetDict, list_metrics, load_metric, load_from_disk
 
-from src.args import Args
+from src.args import ArgBuilder
 from src.dataset import load_and_preprocess_datasets
 
 
@@ -44,8 +44,8 @@ def train(
     )
 
     # Datasets
-    train_dataset = preprocessed_datasets["valid"]
-    eval_dataset = preprocessed_datasets["test"]
+    train_dataset = preprocessed_datasets["train"]
+    eval_dataset = preprocessed_datasets["valid"]
 
     # Setup trainer
     trainer = Trainer(
@@ -81,34 +81,7 @@ def train(
     )
 
 
-def build_args(default_args: Dict):
-    parser = argparse.ArgumentParser()
-
-    for arg, val in default_args.items():
-        val_type = type(val)
-        flag = f"--{arg}"
-
-        if val_type == bool:
-            parser.add_argument(flag, action="store_true", default=val)
-            continue
-
-        parser.add_argument(flag, default=val)
-
-    return parser.parse_args()
-
-
-def main(args):
-    training_args = TrainingArguments(
-        output_dir=args.output_dir,  # output directory
-        evaluation_strategy="epoch",
-        num_train_epochs=args.epochs,  # total # of training epochs
-        per_device_train_batch_size=args.batch_size,  # batch size per device during training
-        per_device_eval_batch_size=args.batch_size,  # batch size for evaluation
-        weight_decay=0.01,  # strength of weight decay
-        logging_dir=args.output_dir,  # directory for storing logs
-        prediction_loss_only=True,
-    )
-
+def main(args, training_args): 
     # Setup tokenizer
     tokenizer = AutoTokenizer.from_pretrained(args.base_model)
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
@@ -137,7 +110,8 @@ def main(args):
 
 
 if __name__ == "__main__":
-    default_args = Args().__dict__
-    args = build_args(default_args)
-
-    main(args)
+    arg_builder = ArgBuilder()
+    args = arg_builder.build_and_parse()
+    arg_builder.set_training_args(args)
+    
+    main(args, arg_builder.training_args)
