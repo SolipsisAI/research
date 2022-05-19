@@ -33,7 +33,7 @@ from src.utils import prepare_data
 try:
     from torch.utils.tensorboard import SummaryWriter
 except ImportError:
-    from tensorboardX import SummaryWriter
+    from tensorboard import SummaryWriter
 
 # Configs
 logger = logging.getLogger(__name__)
