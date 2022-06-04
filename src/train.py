@@ -111,7 +111,7 @@ def train(
     if args.local_rank in [-1, 0]:
         tb_writer = SummaryWriter()
 
-    args.train_batch_size = args.per_gpu_train_batch_size * max(1, args.n_gpu)
+    args.train_batch_size = int(args.per_gpu_train_batch_size) * max(1, args.n_gpu)
 
     def collate(examples: List[torch.Tensor]):
         if tokenizer._pad_token is None:
@@ -221,9 +221,9 @@ def train(
     # Train!
     logger.info("***** Running training *****")
     logger.info("  Num examples = %d", len(train_dataset))
-    logger.info("  Num Epochs = %d", args.num_train_epochs)
+    logger.info("  Num Epochs = %d", int(args.num_train_epochs))
     logger.info(
-        "  Instantaneous batch size per GPU = %d", args.per_gpu_train_batch_size
+        "  Instantaneous batch size per GPU = %d", int(args.per_gpu_train_batch_size)
     )
     logger.info(
         "  Total train batch size (w. parallel, distributed & accumulation) = %d",
@@ -405,7 +405,7 @@ def evaluate(
         args, tokenizer, df_trn, df_val, evaluate=True
     )
     os.makedirs(eval_output_dir, exist_ok=True)
-    args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
+    args.eval_batch_size = int(args.per_gpu_eval_batch_size) * max(1, args.n_gpu)
     # Note that DistributedSampler samples randomly
 
     def collate(examples: List[torch.Tensor]):
