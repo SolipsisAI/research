@@ -1,8 +1,15 @@
+from typing import Union
+
+import pandas as pd
+
 from sklearn.model_selection import train_test_split
 
 
-def prepare_data(data, text_key="content"):
-    """Prepare data"""
+def prepare_data(data: Union[pd.DataFrame, str], text_key="content"):
+    """Prepare and split data into training and evaluation sets"""
+    if isinstance(data, str):
+        data = pd.read_csv(data)
+
     contexted = []
 
     n = 7
