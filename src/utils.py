@@ -25,7 +25,7 @@ def prepare_data(
         row = []
         prev = i - 1 - n
         for j in range(i, prev, -1):
-            row.append(data[text_key][j])
+            row.append(data.iloc[j][text_key])
         contexted.append(row)
 
     columns = ["response", "context"]
