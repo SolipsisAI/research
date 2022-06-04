@@ -19,14 +19,10 @@ import pandas as pd
 import numpy as np
 import torch
 
-from sklearn.model_selection import train_test_split
-
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
 from tqdm.notebook import tqdm, trange
-
-from pathlib import Path
 
 from transformers import (
     MODEL_WITH_LM_HEAD_MAPPING,
@@ -40,6 +36,9 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 
+from src.args import Args
+from src.dataset import load_and_cache_examples
+
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -51,100 +50,6 @@ logger = logging.getLogger(__name__)
 
 MODEL_CONFIG_CLASSES = list(MODEL_WITH_LM_HEAD_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
-
-
-# Args to allow for easy convertion of python script to notebook
-class Args:
-    def __init__(self):
-        self.output_dir = "output-small"
-        self.model_type = "gpt2"
-        self.model_name_or_path = "microsoft/DialoGPT-small"
-        self.config_name = "microsoft/DialoGPT-small"
-        self.tokenizer_name = "microsoft/DialoGPT-small"
-        self.cache_dir = "cached"
-        self.block_size = 512
-        self.do_train = True
-        self.do_eval = True
-        self.evaluate_during_training = False
-        self.per_gpu_train_batch_size = 4
-        self.per_gpu_eval_batch_size = 4
-        self.gradient_accumulation_steps = 1
-        self.learning_rate = 5e-5
-        self.weight_decay = 0.0
-        self.adam_epsilon = 1e-8
-        self.max_grad_norm = 1.0
-        self.num_train_epochs = 3
-        self.max_steps = -1
-        self.warmup_steps = 0
-        self.logging_steps = 1000
-        self.save_steps = 3500
-        self.save_total_limit = None
-        self.eval_all_checkpoints = False
-        self.no_cuda = False
-        self.overwrite_output_dir = True
-        self.overwrite_cache = True
-        self.should_continue = False
-        self.seed = 42
-        self.local_rank = -1
-        self.fp16 = False
-        self.fp16_opt_level = "O1"
-
-
-args = Args()
-
-
-# TODO: Put in separate file
-
-
-def construct_conv(row, tokenizer, eos=True):
-    flatten = lambda l: [item for sublist in l for item in sublist]
-    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row]))
-    conv = flatten(conv)
-    return conv
-
-
-class ConversationDataset(Dataset):
-    def __init__(self, tokenizer: PreTrainedTokenizer, args, df, block_size=512):
-
-        block_size = block_size - (
-            tokenizer.model_max_length - tokenizer.max_len_single_sentence
-        )
-
-        directory = args.cache_dir
-        cached_features_file = os.path.join(
-            directory, args.model_type + "_cached_lm_" + str(block_size)
-        )
-
-        if os.path.exists(cached_features_file) and not args.overwrite_cache:
-            logger.info("Loading features from cached file %s", cached_features_file)
-            with open(cached_features_file, "rb") as handle:
-                self.examples = pickle.load(handle)
-        else:
-            logger.info("Creating features from dataset file at %s", directory)
-
-            self.examples = []
-            for _, row in df.iterrows():
-                conv = construct_conv(row, tokenizer)
-                self.examples.append(conv)
-
-            logger.info("Saving features into cached file %s", cached_features_file)
-            with open(cached_features_file, "wb") as handle:
-                pickle.dump(self.examples, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    def __len__(self):
-        return len(self.examples)
-
-    def __getitem__(self, item):
-        return torch.tensor(self.examples[item], dtype=torch.long)
-
-
-# TODO: put in separate file
-
-# Cacheing and storing of data/checkpoints
-
-
-def load_and_cache_examples(args, tokenizer, df_trn, df_val, evaluate=False):
-    return ConversationDataset(tokenizer, args, df_val if evaluate else df_trn)
 
 
 def set_seed(args):
@@ -201,9 +106,6 @@ def _rotate_checkpoints(args, checkpoint_prefix="checkpoint", use_mtime=False) -
             )
         )
         shutil.rmtree(checkpoint)
-
-
-# TODO: put in separate file
 
 
 def train(
