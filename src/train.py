@@ -470,6 +470,8 @@ def evaluate(
 def main(df_trn, df_val):
     args = Args()
 
+    print(args.__dict__)
+
     if args.should_continue:
         sorted_checkpoints = _sorted_checkpoints(args)
         if len(sorted_checkpoints) == 0:
