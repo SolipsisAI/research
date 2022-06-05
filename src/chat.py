@@ -5,9 +5,10 @@ from transformers import pipeline, Conversation
 
 def chat(model, tokenizer):
     conversational_pipeline = pipeline(
-        "conversational", model=model, tokenizer=tokenizer)
-    
-    conversation_map = {}
+        "conversational", model=model, tokenizer=tokenizer
+    )
+
+    conversation = None
 
     while True:
         text = input(">> ")
@@ -15,14 +16,13 @@ def chat(model, tokenizer):
         if text in ["/q", "/quit", "/e", "/exit"]:
             break
 
-        if not conversation_map:
+        if conversation is None:
             conversation = Conversation()
-            conversation_map[conversation.uuid] = conversation
-        
-        conversation_map[conversation.uuid].add_user_input(text)
+
+        conversation.add_user_input(text)
         print(f"User: {text}")
 
-        conversational_pipeline(conversation) 
+        conversational_pipeline(conversation)
         print(f"Bot: {conversation.generated_responses[-1]}")
 
 
