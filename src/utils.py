@@ -70,18 +70,21 @@ def load_csv(filename):
     return pd.read_csv(filename)
 
 
-def build_args(default_args: Dict):
+def build_args(default_args: Dict, required_args: List = None):
     parser = argparse.ArgumentParser()
 
     for arg, val in default_args.items():
         val_type = type(val)
         flag = f"--{arg}"
+        required = required_args is not None and arg in required_args
 
         if val_type == bool:
-            parser.add_argument(flag, action="store_true", default=val)
+            parser.add_argument(
+                flag, action="store_true", default=val, required=required
+            )
             continue
 
-        parser.add_argument(flag, default=val)
+        parser.add_argument(flag, default=val, required=required)
 
     return parser.parse_args()
 

@@ -11,7 +11,7 @@ from src.utils import build_args, set_seed, prepare_data
 logger = logging.getLogger(__name__)
 
 
-def main(args):
+def run(args):
     df_trn, df_val = prepare_data(data=args.data_filename, filter_by=args.filter_by)
 
     if args.should_continue:
@@ -134,7 +134,8 @@ def main(args):
     return results
 
 
-if __name__ == "__main__":
+def main():
     default_args = Args().__dict__
-    args = build_args(default_args)
-    main(args)
+    required_args = ["data_filename"]
+    args = build_args(default_args, required_args)
+    run(args)
