@@ -393,6 +393,8 @@ def evaluate(
 
     result = {"perplexity": perplexity}
 
+    mlflow.log_metrics(result)
+
     output_eval_file = os.path.join(eval_output_dir, prefix, "eval_results.txt")
     with open(output_eval_file, "w") as writer:
         logger.info("***** Eval results {} *****".format(prefix))
