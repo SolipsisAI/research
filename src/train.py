@@ -1,3 +1,4 @@
+import mlflow
 import logging
 import os
 from typing import Dict, List, Tuple
@@ -270,8 +271,15 @@ def train(
                             tb_writer.add_scalar(
                                 "eval_{}".format(key), value, global_step
                             )
+                            mlflow.log_metric(f"eval_{key}", value, global_step)
                     tb_writer.add_scalar("lr", scheduler.get_lr()[0], global_step)
+                    mlflow.log_metric("lr", scheduler.get_lr()[0], global_step)
                     tb_writer.add_scalar(
+                        "loss",
+                        (tr_loss - logging_loss) / args.logging_steps,
+                        global_step,
+                    )
+                    mlflow.log_metric(
                         "loss",
                         (tr_loss - logging_loss) / args.logging_steps,
                         global_step,

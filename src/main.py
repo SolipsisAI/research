@@ -2,6 +2,7 @@ import glob
 import logging
 import os
 
+import mlflow
 import torch
 from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from src.args import Args
@@ -129,7 +130,7 @@ def run(args):
             model.to(args.device)
             result = evaluate(args, model, tokenizer, df_trn, df_val, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
-            results.update(result)
+            mlflow.log_metrics(results)
 
     return results
 
@@ -138,4 +139,8 @@ def main():
     default_args = Args().__dict__
     required_args = ["output_dir", "data_filename"]
     args = build_args(default_args, required_args)
-    run(args)
+
+    with mlflow.start_run():
+        mlflow.log_params(args.__dict__)
+        results = run(args)
+        mlflow.log_metrics(results)
