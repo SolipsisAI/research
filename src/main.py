@@ -137,3 +137,4 @@ def main(args):
 if __name__ == "__main__":
     default_args = Args().__dict__
     args = build_args(default_args)
+    main(args)
