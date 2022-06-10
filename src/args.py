@@ -33,8 +33,8 @@ class Args:
         self.fp16 = False
         self.fp16_opt_level = "O1"
         self.data_filename = "../data/processed.csv"
+        self.content_key = "content"
         self.filter_by = None
-        self.filter_value = None
 
 
 args = Args()
