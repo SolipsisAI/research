@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
-from transformers import AutoModelWithLMHead, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ def build_args(default_args: Dict, required_args: List = None):
 
 
 def export_model(model_path, output_path):
-    model = AutoModelWithLMHead.from_pretrained(model_path)
+    model = AutoModelForCausalLM.from_pretrained(model_path)
     model.save_pretrained(output_path)
     tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
     tokenizer.save_pretrained(output_path)
@@ -104,28 +104,18 @@ def make_tarfile(output_filename, source_dir):
 
 
 def prepare_data(
-    data: Union[str, pd.DataFrame],
-    filter_by: str,
-    content_key: str = "content",
-    n: int = 7,
-    test_size: float = 0.1,
+    data: Union[str, pd.DataFrame], filter_by: str = None, content_key="content"
 ):
     if isinstance(data, str):
-        data = load_csv(data)
+        data = pd.read_csv(data)
 
-    contexted_data = make_context(
-        data,
-        filter_by=filter_by,
-        content_key=content_key,
-    )
+    filter_key = None
+    filter_value = None
 
-    trn_df, val_df = train_test_split(contexted_data, test_size=test_size)
-
-    return trn_df, val_df
-
-
-def make_context(data, filter_by, content_key="content"):
-    filter_key, filter_value = None, None if not filter_by else filter_by.split("==")
+    if filter_by:
+        filter_args = filter_by.split("==")
+        filter_key = filter_args[0]
+        filter_value = filter_args[1]
 
     contexted = []
     n = 7

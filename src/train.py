@@ -35,7 +35,9 @@ MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 
 def load_and_cache_examples(args, tokenizer, df_trn, df_val, evaluate=False):
-    return ConversationDataset(tokenizer, args, df_val if evaluate else df_trn)
+    return ConversationDataset(
+        tokenizer=tokenizer, args=args, df=(df_val if evaluate else df_trn)
+    )
 
 
 def train(

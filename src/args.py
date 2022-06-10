@@ -1,6 +1,6 @@
 class Args:
     def __init__(self):
-        self.output_dir = "output-small"
+        self.output_dir = None
         self.model_type = "gpt2"
         self.model_name_or_path = "microsoft/DialoGPT-small"
         self.config_name = "microsoft/DialoGPT-small"

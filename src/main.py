@@ -3,7 +3,7 @@ import logging
 import os
 
 import torch
-from transformers import WEIGHTS_NAME, AutoConfig, AutoModelWithLMHead, AutoTokenizer
+from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from src.args import Args
 from src.train import evaluate, load_and_cache_examples, train
 from src.utils import build_args, set_seed, prepare_data
@@ -63,7 +63,7 @@ def run(args):
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name, cache_dir=args.cache_dir
     )
-    model = AutoModelWithLMHead.from_pretrained(
+    model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         from_tf=False,
         config=config,
@@ -76,7 +76,7 @@ def run(args):
     # Training
     if args.do_train:
         train_dataset = load_and_cache_examples(
-            args, tokenizer, df_trn, df_val, evaluate=False
+            args=args, tokenizer=tokenizer, df_trn=df_trn, df_val=df_val, evaluate=False
         )
 
         global_step, tr_loss = train(args, train_dataset, model, tokenizer)
@@ -100,7 +100,7 @@ def run(args):
         torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
 
         # Load a trained model and vocabulary that you have fine-tuned
-        model = AutoModelWithLMHead.from_pretrained(args.output_dir)
+        model = AutoModelForCausalLM.from_pretrained(args.output_dir)
         tokenizer = AutoTokenizer.from_pretrained(args.output_dir)
         model.to(args.device)
 
@@ -125,7 +125,7 @@ def run(args):
                 checkpoint.split("/")[-1] if checkpoint.find("checkpoint") != -1 else ""
             )
 
-            model = AutoModelWithLMHead.from_pretrained(checkpoint)
+            model = AutoModelForCausalLM.from_pretrained(checkpoint)
             model.to(args.device)
             result = evaluate(args, model, tokenizer, df_trn, df_val, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
@@ -136,6 +136,6 @@ def run(args):
 
 def main():
     default_args = Args().__dict__
-    required_args = ["data_filename"]
+    required_args = ["output_dir", "data_filename"]
     args = build_args(default_args, required_args)
     run(args)
