@@ -82,6 +82,7 @@ def run(args):
 
         global_step, tr_loss = train(args, train_dataset, model, tokenizer)
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
+        mlflow.log_metrics({"global_step": global_step, "tr_loss": tr_loss})
 
     # Saving best-practices: if you use save_pretrained for the model and tokenizer, you can reload them using from_pretrained()
     if args.do_train:
