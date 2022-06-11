@@ -23,5 +23,11 @@ pip install -e .
 ## Usage
 
 ```shell
-solipsis-trainer --output_dir ../models/hopperbot-medium --data_filename ../data/processed.csv --filter_by "character==bitjockey" --model_name_or_path="microsoft/DialoGPT-medium" --config_name="microsoft/DialoGPT-medium" --tokenizer_name="microsoft/DialoGPT-medium" --evaluate_during_training 
+solipsis-trainer --output_dir ../models/hopperbot-medium \
+    --data_filename ../data/processed.csv \
+    --filter_by "character==bitjockey" \
+    --model_name_or_path="microsoft/DialoGPT-medium" \
+    --config_name="microsoft/DialoGPT-medium" \
+    --tokenizer_name="microsoft/DialoGPT-medium" \
+    --evaluate_during_training 
 ```
