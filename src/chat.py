@@ -2,7 +2,7 @@ import argparse
 
 import torch
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, ConversationalPipeline, Conversation
+from transformers import AutoModelForCausalLM, AutoTokenizer, Conversation, pipeline
 
 from src.utils import PAD_TOKEN
 
@@ -62,7 +62,11 @@ def chat(model, tokenizer):
 
 
 def chat_pipeline(model, tokenizer):
-    pipeline = ConversationalPipeline(model=model, tokenizer=tokenizer)
+    pipe = pipeline("conversational", model=model, tokenizer=tokenizer)
+    # Disable the "Setting pad_token_id" message
+    # https://github.com/huggingface/transformers/issues/12020#issuecomment-898899723
+    pipe.model.config.pad_token_id = pipe.model.config.eos_token_id
+
     conversation = None
 
     while True:
@@ -76,7 +80,7 @@ def chat_pipeline(model, tokenizer):
         conversation.add_user_input(text)
 
         print(f"User: {text}")
-        result = pipeline(conversation)
+        result = pipe(conversation)
         response = result.generated_responses[-1]
         print(f"Bot: {response}")
 
