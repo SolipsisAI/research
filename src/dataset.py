@@ -1,6 +1,7 @@
 import logging
 import os
 import pickle
+import pandas as pd
 
 import torch
 
@@ -33,7 +34,13 @@ def construct_conv(row, tokenizer, eos=True):
 
 
 class ConversationDataset(Dataset):
-    def __init__(self, tokenizer: PreTrainedTokenizer, args, df, block_size=512):
+    def __init__(
+        self,
+        tokenizer: PreTrainedTokenizer,
+        args,
+        df: pd.DataFrame,
+        block_size: int = 512,
+    ):
         block_size = block_size - (
             tokenizer.model_max_length - tokenizer.max_len_single_sentence
         )

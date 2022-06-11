@@ -76,11 +76,9 @@ def run(args):
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(
-            args=args, tokenizer=tokenizer, df_trn=df_trn, df_val=df_val, evaluate=False
+        global_step, tr_loss = train(
+            args=args, model=model, tokenizer=tokenizer, df_trn=df_trn
         )
-
-        global_step, tr_loss = train(args, train_dataset, model, tokenizer)
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
         mlflow.log_metrics({"global_step": global_step, "tr_loss": tr_loss})
 
@@ -129,7 +127,7 @@ def run(args):
 
             model = AutoModelForCausalLM.from_pretrained(checkpoint)
             model.to(args.device)
-            result = evaluate(args, model, tokenizer, df_trn, df_val, prefix=prefix)
+            result = evaluate(args, model, tokenizer, df_val, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
             mlflow.log_metrics(results)
 

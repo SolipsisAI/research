@@ -2,6 +2,7 @@ import mlflow
 import logging
 import os
 from typing import Dict, List, Tuple
+import pandas as pd
 
 import torch
 
@@ -35,16 +36,23 @@ MODEL_CONFIG_CLASSES = list(MODEL_WITH_LM_HEAD_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 
-def load_and_cache_examples(args, tokenizer, df_trn, df_val, evaluate=False):
-    return ConversationDataset(
-        tokenizer=tokenizer, args=args, df=(df_val if evaluate else df_trn)
-    )
+def load_and_cache_examples(args, tokenizer, df: pd.DataFrame):
+    return ConversationDataset(args=args, tokenizer=tokenizer, df=df)
 
 
 def train(
-    args, train_dataset, model: PreTrainedModel, tokenizer: PreTrainedTokenizer
+    args,
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    df_trn: pd.DataFrame,
 ) -> Tuple[int, float]:
     """Train the model"""
+    train_dataset = load_and_cache_examples(
+        args=args,
+        tokenizer=tokenizer,
+        df=df_trn,
+    )
+
     if args.local_rank in [-1, 0]:
         tb_writer = SummaryWriter()
 
@@ -266,7 +274,12 @@ def train(
                     if (
                         args.local_rank == -1 and args.evaluate_during_training
                     ):  # Only evaluate when single GPU otherwise metrics may not average well
-                        results = evaluate(args, model, tokenizer, df_trn, df_val)
+                        results = evaluate(
+                            args,
+                            model,
+                            tokenizer,
+                            df_trn,
+                        )
                         for key, value in results.items():
                             tb_writer.add_scalar(
                                 "eval_{}".format(key), value, global_step
@@ -335,16 +348,13 @@ def evaluate(
     args,
     model: PreTrainedModel,
     tokenizer: PreTrainedTokenizer,
-    df_trn,
-    df_val,
+    df_val: pd.DataFrame,
     prefix="",
 ) -> Dict:
     # Loop to handle MNLI double evaluation (matched, mis-matched)
     eval_output_dir = args.output_dir
 
-    eval_dataset = load_and_cache_examples(
-        args, tokenizer, df_trn, df_val, evaluate=True
-    )
+    eval_dataset = load_and_cache_examples(args, tokenizer, df=df_val)
     os.makedirs(eval_output_dir, exist_ok=True)
     args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
     # Note that DistributedSampler samples randomly
