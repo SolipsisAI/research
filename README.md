@@ -7,6 +7,8 @@ This is a library used for training the models in our apps.
   - [References](#references)
   - [Setup](#setup)
   - [Usage](#usage)
+    - [Training](#training)
+    - [Chatting](#chatting)
 
 ## Credits
 
@@ -28,6 +30,8 @@ pip install -e .
 
 ## Usage
 
+### Training
+
 ```shell
 solipsis-trainer --output_dir ../models/hopperbot-medium \
     --data_filename ../data/processed.csv \
@@ -36,14 +40,10 @@ solipsis-trainer --output_dir ../models/hopperbot-medium \
     --config_name="microsoft/DialoGPT-medium" \
     --tokenizer_name="microsoft/DialoGPT-medium" \
     --evaluate_during_training 
+```
 
-solipsis-trainer --output_dir ../models/charlottebot-medium \
-    --data_filename ../data/processed.csv \
-    --filter_by "character==Charlotte" \
-    --model_name_or_path "microsoft/DialoGPT-medium" \
-    --config_name "microsoft/DialoGPT-medium" \
-    --tokenizer_name "microsoft/DialoGPT-medium" \
-    --per_gpu_eval_batch_size 2 \
-    --per_gpu_train_batch_size 2 \
-    --evaluate_during_training
+### Chatting
+
+```shell
+solipsis-chat -m ../models/hopperbot-medium -t ../models/hopperbot-medum
 ```
