@@ -15,6 +15,8 @@ from sklearn.model_selection import train_test_split
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from src.constants import PAD_TOKEN
+
 logger = logging.getLogger(__name__)
 
 
@@ -92,7 +94,9 @@ def build_args(default_args: Dict, required_args: List = None):
 def export_model(model_path, output_path):
     model = AutoModelForCausalLM.from_pretrained(model_path)
     model.save_pretrained(output_path)
-    tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_path, pad_token=PAD_TOKEN
+    )
     tokenizer.save_pretrained(output_path)
     make_tarfile(f"{output_path}.tar.gz", output_path)
     print(f"Saved to {output_path}")

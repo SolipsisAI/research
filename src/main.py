@@ -6,7 +6,8 @@ import mlflow
 import torch
 from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from src.args import Args
-from src.train import evaluate, load_and_cache_examples, train
+from src.constants import PAD_TOKEN
+from src.train import evaluate, train
 from src.utils import build_args, set_seed, prepare_data
 
 logger = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ def run(args):
 
     config = AutoConfig.from_pretrained(args.config_name, cache_dir=args.cache_dir)
     tokenizer = AutoTokenizer.from_pretrained(
-        args.tokenizer_name, cache_dir=args.cache_dir
+        args.tokenizer_name, cache_dir=args.cache_dir, pad_token=PAD_TOKEN
     )
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
