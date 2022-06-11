@@ -45,6 +45,7 @@ def train(
     model: PreTrainedModel,
     tokenizer: PreTrainedTokenizer,
     df_trn: pd.DataFrame,
+    df_val: pd.DataFrame = None,
 ) -> Tuple[int, float]:
     """Train the model"""
     train_dataset = load_and_cache_examples(
@@ -278,7 +279,7 @@ def train(
                             args,
                             model,
                             tokenizer,
-                            df_trn,
+                            df_val,
                         )
                         for key, value in results.items():
                             tb_writer.add_scalar(
@@ -288,12 +289,12 @@ def train(
                     tb_writer.add_scalar("lr", scheduler.get_lr()[0], global_step)
                     mlflow.log_metric("lr", scheduler.get_lr()[0], global_step)
                     tb_writer.add_scalar(
-                        "loss",
+                        "tr_loss",
                         (tr_loss - logging_loss) / args.logging_steps,
                         global_step,
                     )
                     mlflow.log_metric(
-                        "loss",
+                        "tr_loss",
                         (tr_loss - logging_loss) / args.logging_steps,
                         global_step,
                     )

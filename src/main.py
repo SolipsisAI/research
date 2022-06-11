@@ -77,7 +77,7 @@ def run(args):
     # Training
     if args.do_train:
         global_step, tr_loss = train(
-            args=args, model=model, tokenizer=tokenizer, df_trn=df_trn
+            args=args, model=model, tokenizer=tokenizer, df_trn=df_trn, df_val=df_val
         )
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
         mlflow.log_metrics({"global_step": global_step, "tr_loss": tr_loss})
