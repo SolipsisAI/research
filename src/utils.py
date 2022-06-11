@@ -6,6 +6,7 @@ import shutil
 import tarfile
 import os.path
 import logging
+from types import NoneType
 
 from typing import Dict, List, Union
 import numpy as np
@@ -76,17 +77,17 @@ def build_args(default_args: Dict, required_args: List = None):
     parser = argparse.ArgumentParser()
 
     for arg, val in default_args.items():
-        val_type = type(val)
         flag = f"--{arg}"
         required = required_args is not None and arg in required_args
 
-        if val_type == bool:
-            parser.add_argument(
-                flag, action="store_true", default=val, required=required
-            )
-            continue
+        options = {"required": required, "default": val}
 
-        parser.add_argument(flag, default=val, required=required)
+        if isinstance(val, bool):
+            options["action"] = "store_true"
+        elif type(val) != NoneType:
+            options["type"] = type(val)
+
+        parser.add_argument(flag, **options)
 
     return parser.parse_args()
 
@@ -94,9 +95,7 @@ def build_args(default_args: Dict, required_args: List = None):
 def export_model(model_path, output_path):
     model = AutoModelForCausalLM.from_pretrained(model_path)
     model.save_pretrained(output_path)
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_path, pad_token=PAD_TOKEN
-    )
+    tokenizer = AutoTokenizer.from_pretrained(model_path, pad_token=PAD_TOKEN)
     tokenizer.save_pretrained(output_path)
     make_tarfile(f"{output_path}.tar.gz", output_path)
     print(f"Saved to {output_path}")

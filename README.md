@@ -36,4 +36,14 @@ solipsis-trainer --output_dir ../models/hopperbot-medium \
     --config_name="microsoft/DialoGPT-medium" \
     --tokenizer_name="microsoft/DialoGPT-medium" \
     --evaluate_during_training 
+
+solipsis-trainer --output_dir ../models/charlottebot-medium \
+    --data_filename ../data/processed.csv \
+    --filter_by "character==Charlotte" \
+    --model_name_or_path "microsoft/DialoGPT-medium" \
+    --config_name "microsoft/DialoGPT-medium" \
+    --tokenizer_name "microsoft/DialoGPT-medium" \
+    --per_gpu_eval_batch_size 2 \
+    --per_gpu_train_batch_size 2 \
+    --evaluate_during_training
 ```
