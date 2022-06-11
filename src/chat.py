@@ -2,7 +2,7 @@ import argparse
 
 import torch
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, ConversationalPipeline, Conversation
 
 from src.utils import PAD_TOKEN
 
@@ -61,15 +61,37 @@ def chat(model, tokenizer):
         print(f"Bot: {response}")
 
 
+def chat_pipeline(model, tokenizer):
+    pipeline = ConversationalPipeline(model=model, tokenizer=tokenizer)
+    conversation = None
+
+    while True:
+        text = input(">> ")
+        if text in ["/q", "/quit", "/e", "/exit"]:
+            break
+
+        if not conversation:
+            conversation = Conversation()
+
+        conversation.add_user_input(text)
+
+        print(f"User: {text}")
+        result = pipeline(conversation)
+        response = result.generated_responses[-1]
+        print(f"Bot: {response}")
+
+
 def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--model_name", "-m")
     parser.add_argument("--tokenizer", "-t")
+    parser.add_argument("--pipeline", action="store_true", default=False)
 
     args = parser.parse_args()
 
     finetuned_model = AutoModelForCausalLM.from_pretrained(args.model_name)
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer, pad_token=PAD_TOKEN)
+    chat_fn = chat_pipeline if args.pipeline else chat
 
-    chat(finetuned_model, tokenizer)
+    chat_fn(finetuned_model, tokenizer)
