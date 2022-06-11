@@ -1,0 +1,11 @@
+jupyterlab-vim
+nltk
+scikit-learn
+pandas
+seaborn
+beakerx
+gensim
+xlrd
+ipdb
+datasets
+tqdm
