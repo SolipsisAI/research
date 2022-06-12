@@ -92,7 +92,10 @@ def build_args(default_args: Dict, required_args: List = None):
     return parser.parse_args()
 
 
-def export_model(model_path, output_path):
+def export_model(model_path, output_path=None):
+    if not output_path:
+        output_path = f"{model_path}__exported"
+
     model = AutoModelForCausalLM.from_pretrained(model_path)
     model.save_pretrained(output_path)
     tokenizer = AutoTokenizer.from_pretrained(model_path, pad_token=PAD_TOKEN)
