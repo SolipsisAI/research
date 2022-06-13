@@ -36,12 +36,12 @@ pip install -e .
 ### Training
 
 ```shell
-solipsis-trainer --output_dir="../models/ERICA-medium" \
+solipsis-trainer --output_dir="../models/ERICA-small" \
     --data_filename="../data/empathetic_dialogue_processed.csv" \
-    --model_name_or_path="microsoft/DialoGPT-medium" \
-    --config_name="microsoft/DialoGPT-medium" \
-    --tokenizer_name="microsoft/DialoGPT-medium" \
-    --evaluate_during_training 
+    --model_name_or_path="microsoft/DialoGPT-small" \
+    --config_name="microsoft/DialoGPT-small" \
+    --tokenizer_name="microsoft/DialoGPT-small" #\
+    #--evaluate_during_training 
 ```
 
 ### Chatting
