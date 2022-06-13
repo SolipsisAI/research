@@ -40,12 +40,12 @@ solipsis-trainer --output_dir="../models/ERICA-small" \
     --data_filename="../data/empathetic_dialogue_processed.csv" \
     --model_name_or_path="microsoft/DialoGPT-small" \
     --config_name="microsoft/DialoGPT-small" \
-    --tokenizer_name="microsoft/DialoGPT-small" #\
-    #--evaluate_during_training 
+    --tokenizer_name="microsoft/DialoGPT-small" \
+    --filter_by="speaker==<s0>"
 ```
 
 ### Chatting
 
 ```shell
-solipsis-chat -m ../models/hopperbot-medium -t ../models/hopperbot-medum
+solipsis-chat -m ../models/hopperbot-medium -t ../models/hopperbot-medium -c ../models/distilroberta-finetuned
 ```
