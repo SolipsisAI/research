@@ -7,7 +7,7 @@ import torch
 from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from src.args import Args
 from src.train import evaluate, load_and_cache_examples, train
-from src.utils import build_args, set_seed, prepare_data
+from src.utils import build_args, set_seed, prepare_data, sorted_checkpoints as sort_checkpoints
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def run(args):
     )
 
     if args.should_continue:
-        sorted_checkpoints = sorted_checkpoints(args)
+        sorted_checkpoints = sort_checkpoints(args)
         if len(sorted_checkpoints) == 0:
             raise ValueError(
                 "Used --should_continue but no checkpoint was found in --output_dir."
