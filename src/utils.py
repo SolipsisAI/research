@@ -6,19 +6,31 @@ import shutil
 import tarfile
 import os.path
 import logging
+import json
+
 from types import NoneType
-
 from typing import Dict, List, Union
-import numpy as np
+from pathlib import Path
 
-import pandas as pd
-from sklearn.model_selection import train_test_split
+import numpy as np
 import torch
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from src.constants import PAD_TOKEN
 
+ROOT_DIR = Path(__file__).parent.resolve()
+DATA_DIR = ROOT_DIR.joinpath("data")
+
+
 logger = logging.getLogger(__name__)
+
+
+def read_json(filename: str) -> Dict:
+    with open(filename, "r") as json_file:
+        return json.load(json_file)
 
 
 def sorted_checkpoints(
