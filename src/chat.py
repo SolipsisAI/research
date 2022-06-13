@@ -1,8 +1,7 @@
 import argparse
 
 import torch
-from transformers import (AutoModelForCausalLM, AutoTokenizer, Conversation,
-                          pipeline)
+from transformers import AutoModelForCausalLM, AutoTokenizer, Conversation, pipeline
 
 from src.classifier import Classifier
 from src.utils import PAD_TOKEN

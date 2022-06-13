@@ -4,8 +4,7 @@ import os
 
 import mlflow
 import torch
-from transformers import (WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM,
-                          AutoTokenizer)
+from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 from src.args import Args
 from src.constants import PAD_TOKEN
