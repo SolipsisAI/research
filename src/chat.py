@@ -30,7 +30,7 @@ def generate_responses(model, tokenizer, text, chat_history_ids=None, step=0):
         do_sample=True,
         top_k=100,
         top_p=0.7,
-        #temperature=0.8,
+        # temperature=0.8,
     )
 
     response = tokenizer.decode(
@@ -56,19 +56,19 @@ def chat(model, tokenizer, classifier=None):
 
         if classifier:
             context_label = classifier.classify(text, k=1)[0]
-            prefix = f"{context_label} "
+            prefix = f"{context_label}"
 
         response, chat_history_ids, step = generate_responses(
             model=model,
             tokenizer=tokenizer,
-            text=f"{prefix}text",
+            text=f"{prefix} {text}",
             chat_history_ids=chat_history_ids,
             step=step,
         )
         print(f"Bot: {response}")
 
 
-def chat_pipeline(model, tokenizer):
+def chat_pipeline(model, tokenizer, classifier=None):
     pipe = pipeline("conversational", model=model, tokenizer=tokenizer)
     # Disable the "Setting pad_token_id" message
     # https://github.com/huggingface/transformers/issues/12020#issuecomment-898899723
@@ -84,7 +84,13 @@ def chat_pipeline(model, tokenizer):
         if not conversation:
             conversation = Conversation()
 
-        conversation.add_user_input(text)
+        prefix = ""
+
+        if classifier:
+            context_label = classifier.classify(text, k=1)[0]
+            prefix = f"{context_label}"
+
+        conversation.add_user_input(f"{prefix} {text}")
 
         print(f"User: {text}")
         result = pipe(conversation)

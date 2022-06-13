@@ -19,9 +19,9 @@ MODEL_CONFIG_CLASSES = list(MODEL_WITH_LM_HEAD_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 
-def construct_conv(row, tokenizer, eos=True, max_length=1024):
+def construct_conv(row, tokenizer, eos=True):
     flatten = lambda l: [item for sublist in l for item in sublist]
-    conv = list(reversed([tokenizer.encode(x, max_length=max_length) + [tokenizer.eos_token_id] for x in row]))
+    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row]))
     conv = flatten(conv)
     return conv
 
@@ -53,7 +53,8 @@ class ConversationDataset(Dataset):
             self.examples = []
             for _, row in df.iterrows():
                 conv = construct_conv(row, tokenizer)
-                if len(conv) > block_size: continue
+                if len(conv) > block_size:
+                    continue
                 self.examples.append(conv)
 
             logger.info("Saving features into cached file %s", cached_features_file)

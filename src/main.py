@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 def run(args):
-    df_trn, df_val = prepare_data(data=args.data_filename, filter_by=args.filter_by)
+    df_trn, df_val = prepare_data(
+        data=args.data_filename, filter_by=args.filter_by, content_key=args.content_key
+    )
 
     if args.should_continue:
         sorted_checkpoints = sorted_checkpoints(args)
