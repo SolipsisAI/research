@@ -104,8 +104,13 @@ def make_tarfile(output_filename, source_dir):
 
 
 def prepare_data(
-    data: Union[str, pd.DataFrame], filter_by: str = None, content_key="content"
+    data: Union[str, pd.DataFrame],
+    filter_by: str = None,
+    content_key="content",
+    num_history: int = 7,
 ):
+    n = int(num_history)
+
     if isinstance(data, str):
         data = pd.read_csv(data)
 
@@ -118,7 +123,6 @@ def prepare_data(
         filter_value = filter_args[1]
 
     contexted = []
-    n = 7
 
     if filter_by:
         indexes = data.loc[data[filter_key] == filter_value].index

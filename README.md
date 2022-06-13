@@ -23,11 +23,24 @@ pip install -e .
 ## Usage
 
 ```shell
-solipsis-trainer --output_dir ../models/hopperbot-medium \
-    --data_filename ../data/processed.csv \
-    --filter_by "character==bitjockey" \
-    --model_name_or_path="microsoft/DialoGPT-medium" \
-    --config_name="microsoft/DialoGPT-medium" \
-    --tokenizer_name="microsoft/DialoGPT-medium" \
-    --evaluate_during_training 
+export TIMESTAMP=$(date +"%Y-%m-%d-%H:%M:%S")
+export OUTPUT_DIR=ERICA-medium__$TIMESTAMP
+export DATA_FILENAME=../data/empathetic_dialogue_processed.csv
+export MODEL_BASE="microsoft/DialoGPT-medium"
+export FILTER_BY="speaker==<s1>"
+
+solipsis-trainer --output_dir $OUTPUT_DIR \
+    --data_filename $DATA_FILENAME \
+    --filter_by $FILTER_BY \
+    --model_name_or_path=$MODEL_BASE \
+    --config_name=$MODEL_BASE \
+    --tokenizer_name=$MODEL_BASE \
+    --content_key="text"
+
+
+export TIMESTAMP=$(date +"%Y-%m-%d-%H:%M:%S")
+export OUTPUT_DIR=hopperbot-medium__$TIMESTAMP
+export DATA_FILENAME=../data/processed.csv
+export MODEL_BASE="microsoft/DialoGPT-medium"
+export FILTER_BY="character==bitjockey"
 ```

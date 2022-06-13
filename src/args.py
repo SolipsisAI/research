@@ -35,6 +35,7 @@ class Args:
         self.data_filename = None
         self.content_key = "content"
         self.filter_by = None
+        self.num_history = 7
 
 
 args = Args()
