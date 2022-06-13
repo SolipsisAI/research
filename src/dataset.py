@@ -19,9 +19,17 @@ MODEL_CONFIG_CLASSES = list(MODEL_WITH_LM_HEAD_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 
-def construct_conv(row, tokenizer, eos=True):
+def construct_conv(row, tokenizer, eos=True, max_length=None):
+    opts = {}
+
+    if max_length is not None:
+        opts["max_length"] = max_length
+        opts["truncation"] = True
+
     flatten = lambda l: [item for sublist in l for item in sublist]
-    conv = list(reversed([tokenizer.encode(x) + [tokenizer.eos_token_id] for x in row]))
+    conv = list(
+        reversed([tokenizer.encode(x, **opts) + [tokenizer.eos_token_id] for x in row])
+    )
     conv = flatten(conv)
     return conv
 
@@ -52,7 +60,7 @@ class ConversationDataset(Dataset):
 
             self.examples = []
             for _, row in df.iterrows():
-                conv = construct_conv(row, tokenizer)
+                conv = construct_conv(row, tokenizer, max_length=block_size)
                 if len(conv) > block_size:
                     continue
                 self.examples.append(conv)

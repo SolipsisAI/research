@@ -128,7 +128,7 @@ def prepare_data(
     data: Union[str, pd.DataFrame],
     filter_by: str = None,
     content_key="text",
-    n: int = 3,
+    n: int = 7,
 ):
     if isinstance(data, str):
         data = pd.read_csv(data, on_bad_lines="skip")
