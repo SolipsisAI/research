@@ -33,7 +33,7 @@ class Args:
         self.fp16 = False
         self.fp16_opt_level = "O1"
         self.data_filename = None
-        self.content_key = "content"
+        self.content_key = "text"
         self.filter_by = None
 
 
