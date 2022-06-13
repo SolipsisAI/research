@@ -30,7 +30,7 @@ def generate_responses(model, tokenizer, text, chat_history_ids=None, step=0):
         do_sample=True,
         top_k=100,
         top_p=0.7,
-        temperature=0.8,
+        #temperature=0.8,
     )
 
     response = tokenizer.decode(
@@ -55,7 +55,7 @@ def chat(model, tokenizer, classifier=None):
         prefix = ""
 
         if classifier:
-            context_label = classifier.classify(text)
+            context_label = classifier.classify(text, k=1)[0]
             prefix = f"{context_label} "
 
         response, chat_history_ids, step = generate_responses(

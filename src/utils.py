@@ -20,15 +20,20 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from src.constants import PAD_TOKEN
 
 ROOT_DIR = Path(__file__).parent.resolve()
-DATA_DIR = ROOT_DIR.joinpath("data")
+DATA_DIR = ROOT_DIR.parent.resolve().joinpath("data")
 
 
 logger = logging.getLogger(__name__)
 
 
-def read_json(filename: str) -> Dict:
+def read_json(filename: str, as_type=None) -> Dict:
     with open(filename, "r") as json_file:
-        return json.load(json_file)
+        data = json.load(json_file)
+
+        if as_type is not None:
+            data = dict([(as_type(k), v) for k, v in data.items()])
+
+        return data
 
 
 def sorted_checkpoints(

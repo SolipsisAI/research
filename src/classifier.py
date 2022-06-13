@@ -17,7 +17,7 @@ class Classifier:
         if not label2id_file:
             label2id_file = LABEL2ID_FILEPATH
         self.pipe = pipeline("text-classification", model=model, return_all_scores=True)
-        self.pipe.model.config.id2label = read_json(id2label_file)
+        self.pipe.model.config.id2label = read_json(id2label_file, as_type=int)
         self.pipe.model.config.label2id = read_json(label2id_file)
 
     def classify(self, text, k: int = 1) -> Union[List[Dict], List[str]]:
