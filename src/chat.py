@@ -1,4 +1,5 @@
 import argparse
+import re
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, Conversation, pipeline
@@ -7,7 +8,6 @@ from src.classifier import Classifier
 from src.utils import PAD_TOKEN
 
 
-## Chat App
 def generate_responses(model, tokenizer, text, chat_history_ids=None, step=0):
     # encode the new user input, add the eos_token and return a tensor in Pytorch
     new_user_input_ids = tokenizer.encode(
@@ -42,6 +42,7 @@ def generate_responses(model, tokenizer, text, chat_history_ids=None, step=0):
 
 
 def chat(model, tokenizer, classifier=None):
+    """Use model.generate to interact"""
     step = 0
     chat_history_ids = []
 
@@ -52,23 +53,19 @@ def chat(model, tokenizer, classifier=None):
 
         print(f"User: {text}")
 
-        prefix = ""
-
-        if classifier:
-            context_label = classifier.classify(text, k=1)[0]
-            prefix = f"{context_label}"
-
         response, chat_history_ids, step = generate_responses(
             model=model,
             tokenizer=tokenizer,
-            text=f"{prefix} {text}",
+            text=preprocess_text(text, classifier=classifier),
             chat_history_ids=chat_history_ids,
             step=step,
         )
-        print(f"Bot: {response}")
+
+        print(f"Bot: {clean_text(response)}")
 
 
 def chat_pipeline(model, tokenizer, classifier=None):
+    """Use conversational pipeline to interact"""
     pipe = pipeline("conversational", model=model, tokenizer=tokenizer)
     # Disable the "Setting pad_token_id" message
     # https://github.com/huggingface/transformers/issues/12020#issuecomment-898899723
@@ -84,18 +81,28 @@ def chat_pipeline(model, tokenizer, classifier=None):
         if not conversation:
             conversation = Conversation()
 
-        prefix = ""
-
-        if classifier:
-            context_label = classifier.classify(text, k=1)[0]
-            prefix = f"{context_label}"
-
-        conversation.add_user_input(f"{prefix} {text}")
+        conversation.add_user_input(preprocess_text(text, classifier=classifier))
 
         print(f"User: {text}")
+
         result = pipe(conversation)
         response = result.generated_responses[-1]
-        print(f"Bot: {response}")
+
+        print(f"Bot: {clean_text(response)}")
+
+
+def preprocess_text(text, classifier=None):
+    """Prepend context label if classifier specified"""
+    prefix = ""
+    if classifier:
+        context_label = classifier.classify(text, k=1)[0]
+        prefix = f"{context_label} "
+    return f"{prefix}{text}"
+
+
+def clean_text(text):
+    """Clean response text"""
+    return re.sub(r"^\w+", "", text)
 
 
 def main():
