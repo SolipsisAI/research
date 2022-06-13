@@ -1,18 +1,11 @@
 import logging
 import os
 import pickle
+
 import pandas as pd
-
 import torch
-
-
 from torch.utils.data import Dataset
-
-
-from transformers import (
-    MODEL_WITH_LM_HEAD_MAPPING,
-    PreTrainedTokenizer,
-)
+from transformers import MODEL_WITH_LM_HEAD_MAPPING, PreTrainedTokenizer
 
 try:
     pass

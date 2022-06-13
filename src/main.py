@@ -4,11 +4,13 @@ import os
 
 import mlflow
 import torch
-from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
+from transformers import (WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM,
+                          AutoTokenizer)
+
 from src.args import Args
 from src.constants import PAD_TOKEN
 from src.train import evaluate, train
-from src.utils import build_args, set_seed, prepare_data
+from src.utils import build_args, prepare_data, set_seed
 
 logger = logging.getLogger(__name__)
 

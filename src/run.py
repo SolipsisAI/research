@@ -1,9 +1,8 @@
 import argparse
 
-from train import run
 from args import Args
+from train import run
 from utils import build_args
-
 
 if __name__ == "__main__":
     default_args = Args().__dict__

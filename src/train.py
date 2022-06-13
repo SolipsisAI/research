@@ -1,25 +1,16 @@
-import mlflow
 import logging
 import os
 from typing import Dict, List, Tuple
+
+import mlflow
 import pandas as pd
-
 import torch
-
-
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
 from tqdm.notebook import tqdm, trange
-
-
-from transformers import (
-    MODEL_WITH_LM_HEAD_MAPPING,
-    AdamW,
-    PreTrainedModel,
-    PreTrainedTokenizer,
-    get_linear_schedule_with_warmup,
-)
+from transformers import (MODEL_WITH_LM_HEAD_MAPPING, AdamW, PreTrainedModel,
+                          PreTrainedTokenizer, get_linear_schedule_with_warmup)
 
 from src.dataset import ConversationDataset
 from src.utils import rotate_checkpoints, set_seed

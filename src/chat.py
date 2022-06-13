@@ -1,9 +1,10 @@
 import argparse
 
 import torch
+from transformers import (AutoModelForCausalLM, AutoTokenizer, Conversation,
+                          pipeline)
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, Conversation, pipeline
-
+from src.classifier import Classifier
 from src.utils import PAD_TOKEN
 
 
@@ -41,7 +42,7 @@ def generate_responses(model, tokenizer, text, chat_history_ids=None, step=0):
     return response, chat_history_ids, step + 1
 
 
-def chat(model, tokenizer):
+def chat(model, tokenizer, classifier=None):
     step = 0
     chat_history_ids = []
 
@@ -51,10 +52,17 @@ def chat(model, tokenizer):
             break
 
         print(f"User: {text}")
+
+        prefix = ""
+
+        if classifier:
+            context_label = classifier.classify(text)
+            prefix = f"{context_label} "
+
         response, chat_history_ids, step = generate_responses(
             model=model,
             tokenizer=tokenizer,
-            text=text,
+            text=f"{prefix}text",
             chat_history_ids=chat_history_ids,
             step=step,
         )
@@ -90,12 +98,18 @@ def main():
 
     parser.add_argument("--model_name", "-m")
     parser.add_argument("--tokenizer", "-t")
-    parser.add_argument("--pipeline", action="store_true", default=False)
+    parser.add_argument("--classifier", "-c", default=None)
+    parser.add_argument("--pipeline", "-p", action="store_true", default=False)
 
     args = parser.parse_args()
+
+    classifier = None
+
+    if args.classifier is not None:
+        classifier = Classifier(model=args.classifier)
 
     finetuned_model = AutoModelForCausalLM.from_pretrained(args.model_name)
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer, pad_token=PAD_TOKEN)
     chat_fn = chat_pipeline if args.pipeline else chat
 
-    chat_fn(finetuned_model, tokenizer)
+    chat_fn(finetuned_model, tokenizer, classifier=classifier)

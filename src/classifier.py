@@ -1,7 +1,8 @@
-from ctypes import Union
+from typing import Union
+
 from transformers import PreTrainedModel, pipeline
 
-from src.utils import read_json, DATA_DIR
+from src.utils import DATA_DIR, read_json
 
 ID2LABEL_FILE = DATA_DIR.joinpath("id2label.json")
 LABEL2ID_FILE = DATA_DIR.joinpath("label2id.json")
