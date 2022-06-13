@@ -14,6 +14,7 @@ This is a library used for training the models in our apps.
 
 The scripts/code here were heavily lifted from:
 
+- [🦄 How to build a State-of-the-Art Conversational AI with Transfer Learning](https://medium.com/huggingface/how-to-build-a-state-of-the-art-conversational-ai-with-transfer-learning-2d818ac26313) by [Thom Wolf](http://thomwolf.io/)
 - [How to fine-tune the DialoGPT model on a new dataset for open-dialog conversational chatbots](https://github.com/ncoop57/i-am-a-nerd/blob/master/_notebooks/2020-05-12-chatbot-part-1.ipynb) by [Nathan Cooper](https://github.com/ncoop57)
 - [Make your own Rick Sanchez (bot) with Transformers and DialoGPT fine-tuning](https://colab.research.google.com/drive/15wa925dj7jvdvrz8_z3vU7btqAFQLVlG) by [Rostyslav Neskorozhenyi](https://www.linkedin.com/in/slanj)
 
@@ -25,6 +26,8 @@ The scripts/code here were heavily lifted from:
 ## Setup
 
 ```shell
+git clone git@github.com:SolipsisAI/research.git solipsis-research
+cd solipsis-research
 pip install -e .
 ```
 
