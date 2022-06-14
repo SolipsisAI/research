@@ -1,21 +1,36 @@
 import argparse
 import glob
+import logging
+import os.path
 import random
 import re
 import shutil
 import tarfile
-import os.path
-import logging
-
 from typing import Dict, List, Union
-import numpy as np
 
+import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import torch
+from sklearn.model_selection import train_test_split
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
+
+
+def get_speaker(text):
+    results = re.findall(r"^<s\d>", text)
+    return results
+
+
+def clean_text(text):
+    turn_token = "<|endoftext|>"
+    text = re.sub(r"^<s\d>", "", text)
+    return re.sub(r"{turn_token}$", "", text)
+
+
+def clean_text(text):
+    text = re.sub(r"^<s\d>", "", text)
+    return re.sub(r"{turn_token}$", "", text)
 
 
 def sorted_checkpoints(

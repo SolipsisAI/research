@@ -5,14 +5,11 @@ import os
 import mlflow
 import torch
 from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
+
 from src.args import Args
 from src.train import evaluate, load_and_cache_examples, train
-from src.utils import (
-    build_args,
-    set_seed,
-    prepare_data,
-    sorted_checkpoints as sort_checkpoints,
-)
+from src.utils import build_args, prepare_data, set_seed
+from src.utils import sorted_checkpoints as sort_checkpoints
 
 logger = logging.getLogger(__name__)
 
