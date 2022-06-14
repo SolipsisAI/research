@@ -14,8 +14,6 @@ from src.utils import (
     sorted_checkpoints as sort_checkpoints,
 )
 
-PAD_TOKEN = "<|pad|>"
-
 logger = logging.getLogger(__name__)
 
 
@@ -85,11 +83,9 @@ def run(args):
         args.tokenizer_name = args.model_name_or_path
 
     config = AutoConfig.from_pretrained(args.config_name, cache_dir=args.cache_dir)
-
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name, cache_dir=args.cache_dir
     )
-    tokenizer.pad_token = PAD_TOKEN
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path,
         from_tf=False,
