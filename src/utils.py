@@ -23,14 +23,9 @@ def get_speaker(text):
 
 
 def clean_text(text):
-    turn_token = "<|endoftext|>"
+    turn_token = "\<\|endoftext\|\>"
     text = re.sub(r"^<s\d>", "", text)
-    return re.sub(r"{turn_token}$", "", text)
-
-
-def clean_text(text):
-    text = re.sub(r"^<s\d>", "", text)
-    return re.sub(r"{turn_token}$", "", text)
+    return re.sub(r"{turn_token}$".format(turn_token=turn_token), "", text)
 
 
 def sorted_checkpoints(

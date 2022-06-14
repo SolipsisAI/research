@@ -23,12 +23,12 @@ pip install -e .
 ## Usage
 
 ```shell
-solipsis-trainer --output_dir=../models/ERICA-medium \
-    --data_filename=../data/empathetic_dialogue_processed.csv \
+solipsis-trainer --output_dir=../models/ERICA \
+    --data_filename=../data/empathetic_dialogue_processed_train--cleaned128.csv \
     --filter_by="speaker==<s1>" \
     --model_name_or_path="microsoft/DialoGPT-medium" \
     --config_name="microsoft/DialoGPT-medium" \
     --tokenizer_name="microsoft/DialoGPT-medium" \
-    --text_key="text"
+    --text_key="text" \
     --num_history=7
 ```

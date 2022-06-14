@@ -8,7 +8,7 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
-from tqdm.notebook import tqdm, trange
+from tqdm.autonotebook import tqdm, trange
 from transformers import (
     MODEL_WITH_LM_HEAD_MAPPING,
     AdamW,
