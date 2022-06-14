@@ -65,7 +65,13 @@ def run(args):
     # Set seed
     set_seed(args)
 
-    config = AutoConfig.from_pretrained(args.config_name, cache_dir=args.cache_dir)
+    config_name = args.config_name
+
+    if args.model_name_or_path != config_name:
+        logger.info(f"Setting config_name {config_name} to {args.model_name_or_path}")
+        config_name = args.model_name_or_path
+
+    config = AutoConfig.from_pretrained(config_name, cache_dir=args.cache_dir)
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name, cache_dir=args.cache_dir
     )
