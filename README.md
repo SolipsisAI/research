@@ -29,6 +29,6 @@ solipsis-trainer --output_dir=../models/ERICA-medium \
     --model_name_or_path="microsoft/DialoGPT-medium" \
     --config_name="microsoft/DialoGPT-medium" \
     --tokenizer_name="microsoft/DialoGPT-medium" \
-    --content_key="text"
+    --text_key="text"
     --num_history=7
 ```

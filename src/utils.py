@@ -106,7 +106,7 @@ def make_tarfile(output_filename, source_dir):
 def prepare_data(
     data: Union[str, pd.DataFrame],
     filter_by: str = None,
-    content_key="content",
+    text_key: str = "text",
     num_history: int = 7,
     test_size: int = 0.2,
 ):
@@ -128,7 +128,7 @@ def prepare_data(
     if filter_by:
         indexes = data.loc[data[filter_key] == filter_value].index
     else:
-        indexes = range(n, len(data[content_key]))
+        indexes = range(n, len(data[text_key]))
 
     for i in indexes:
         if filter_key and filter_value and i < n:
@@ -139,7 +139,7 @@ def prepare_data(
             i - 1 - n
         )  # we additionally subtract 1, so row will contain current response and 7 previous responses
         for j in range(i, prev, -1):
-            row.append(data[content_key][j])
+            row.append(data[text_key][j])
         contexted.append(row)
 
     columns = ["response", "context"]
