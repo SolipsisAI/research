@@ -108,6 +108,7 @@ def prepare_data(
     filter_by: str = None,
     content_key="content",
     num_history: int = 7,
+    test_size: int = 0.2,
 ):
     n = int(num_history)
 
@@ -145,7 +146,11 @@ def prepare_data(
     columns = columns + ["context/" + str(i) for i in range(n - 1)]
 
     df = pd.DataFrame.from_records(contexted, columns=columns)
-    return train_test_split(df, test_size=0.1)
+
+    if test_size is None:
+        return df
+
+    return train_test_split(df, test_size=test_size)
 
 
 def set_seed(args):
