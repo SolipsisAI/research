@@ -70,13 +70,19 @@ def run(args):
     # Set seed
     set_seed(args)
 
-    config_name = args.config_name
+    if args.config_name is None:
+        logger.info(
+            f"Setting config_name to {args.model_name_or_path} to match {args.model_name_or_path}"
+        )
+        args.config_name = args.model_name_or_path
 
-    if args.model_name_or_path != config_name:
-        logger.info(f"Setting config_name {config_name} to {args.model_name_or_path}")
-        config_name = args.model_name_or_path
+    if args.tokenizer_name is None:
+        logger.info(
+            f"Setting tokenizer_name to {args.model_name_or_path} to match {args.model_name_or_path}"
+        )
+        args.tokenizer_name = args.model_name_or_path
 
-    config = AutoConfig.from_pretrained(config_name, cache_dir=args.cache_dir)
+    config = AutoConfig.from_pretrained(args.config_name, cache_dir=args.cache_dir)
     tokenizer = AutoTokenizer.from_pretrained(
         args.tokenizer_name, cache_dir=args.cache_dir
     )

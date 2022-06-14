@@ -3,8 +3,8 @@ class Args:
         self.output_dir = None
         self.model_type = "gpt2"
         self.model_name_or_path = "microsoft/DialoGPT-small"
-        self.config_name = "microsoft/DialoGPT-small"
-        self.tokenizer_name = "microsoft/DialoGPT-small"
+        self.config_name = None
+        self.tokenizer_name = None
         self.cache_dir = "cached"
         self.block_size = 512
         self.do_train = True
