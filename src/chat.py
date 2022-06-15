@@ -60,16 +60,15 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = 1000):
         print(f"Bot: {postprocess_text(response)}")
 
 
-def chat_pipeline(model, tokenizer, classifier=None, device=None):
+def chat_pipeline(model, tokenizer, classifier=None, device=None, max_length=1000):
     conversation = Conversation()
     pipe = ConversationalPipeline(
         model=model,
         tokenizer=tokenizer,
         device=-1 if device == "cpu" else device,
-        max_length=tokenizer.max_len_single_sentence,
     )
     pipe.model.config.pad_token_id = pipe.tokenizer.eos_token_id
-    pipe.model.max_length = 128
+    pipe.model.max_length = max_length
 
     while True:
         text = input(">> ")
