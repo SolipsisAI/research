@@ -31,9 +31,11 @@ def get_speaker(text):
     return results
 
 
-def clean_text(text):
+def clean_text(text, replace_comma=False):
     turn_token = "\<\|endoftext\|\>"
     text = re.sub(r"^<s\d>", "", text)
+    if replace_comma:
+        text = re.sub(r"_comma_", ", ", text)
     return re.sub(r"{turn_token}$".format(turn_token=turn_token), "", text)
 
 

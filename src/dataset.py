@@ -25,7 +25,11 @@ def construct_conv(row, tokenizer, eos=True):
     flatten = lambda l: [item for sublist in l for item in sublist]
     conv = list(
         reversed(
-            [tokenizer.encode(clean_text(x)) + [tokenizer.eos_token_id] for x in row]
+            [
+                tokenizer.encode(clean_text(x, replace_comma=True))
+                + [tokenizer.eos_token_id]
+                for x in row
+            ]
         )
     )
     conv = flatten(conv)
