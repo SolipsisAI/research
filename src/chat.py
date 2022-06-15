@@ -76,15 +76,8 @@ def chat_pipeline(model, tokenizer, classifier=None, device=None, max_length=100
         device=-1 if device == "cpu" else device,
     )
 
-    # Set model configuration
-    # TODO: Save this to file
-    pipe.model.config.pad_token_id = pipe.tokenizer.eos_token_id
+    # Override the max_length. Other config is set in the model itself.
     pipe.model.config.max_length = max_length
-    pipe.model.config.no_repeat_ngram_size = 3
-    pipe.model.config.do_sample = True
-    pipe.model.config.top_k = 100
-    pipe.model.config.top_p = 0.7
-    pipe.model.config.temperature = 0.8
 
     while True:
         text = input(">> ")
