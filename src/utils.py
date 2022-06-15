@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 
 logger = logging.getLogger(__name__)
 
@@ -113,8 +113,11 @@ def build_args(default_args: Dict, required_args: List = None):
 def export_model(model_path, tokenizer_path, output_path):
     model = AutoModelForCausalLM.from_pretrained(model_path)
     model.save_pretrained(output_path)
+    config = AutoConfig.from_pretrained(model_path)
+    config.save_pretrained(output_path)
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     tokenizer.save_pretrained(output_path)
+
     make_tarfile(f"{output_path}.tar.gz", output_path)
     print(f"Saved to {output_path}")
 
