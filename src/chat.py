@@ -13,7 +13,7 @@ from transformers import (
 from src.classifier import Classifier
 
 
-def chat(model, tokenizer, device, classifier=None):
+def chat(model, tokenizer, device, classifier=None, max_length: int = 1000):
     """Use model.generate to interact"""
     model.config.pad_token_id = tokenizer.pad_token_id
 
@@ -43,7 +43,7 @@ def chat(model, tokenizer, device, classifier=None):
         # generate chat ids
         chat_history_ids = model.generate(
             bot_input_ids,
-            max_length=512,
+            max_length=max_length,
             pad_token_id=tokenizer.eos_token_id,
             no_repeat_ngram_size=3,
             do_sample=True,
@@ -57,7 +57,7 @@ def chat(model, tokenizer, device, classifier=None):
             skip_special_tokens=True,
         )
 
-        print(f"Bot: {clean_text(response)}")
+        print(f"Bot: {postprocess_text(response)}")
 
 
 def chat_pipeline(model, tokenizer, classifier=None, device=None):
@@ -83,7 +83,7 @@ def chat_pipeline(model, tokenizer, classifier=None, device=None):
         result = pipe(conversation)
         response = result.generated_responses[-1]
 
-        print(f"Bot: {clean_text(response)}")
+        print(f"Bot: {postprocess_text(response)}")
 
 
 def preprocess_text(text, classifier=None):
@@ -95,9 +95,10 @@ def preprocess_text(text, classifier=None):
     return f"{prefix}{text}"
 
 
-def clean_text(text):
+def postprocess_text(text):
     """Clean response text"""
-    return re.sub(r"^\w+", "", text)
+    text = re.sub(r"^\w+", "", text)
+    return re.sub(r"_comma_", ",", text)
 
 
 def main():
@@ -115,6 +116,7 @@ def main():
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="Device (cuda or cpu)",
     )
+    parser.add_argument("--max_length", default=1000)
 
     args = parser.parse_args()
 
@@ -137,4 +139,4 @@ def main():
 
     chat_fn = chat_pipeline if args.pipeline else chat
 
-    chat_fn(model, tokenizer, classifier=classifier, device=args.device)
+    chat_fn(model, tokenizer, classifier=classifier, device=args.device, max_length=args.max_length)
