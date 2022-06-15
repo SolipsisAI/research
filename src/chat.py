@@ -1,7 +1,6 @@
-from datetime import datetime
-
 import argparse
 import re
+from datetime import datetime
 
 import torch
 from transformers import (
@@ -15,9 +14,13 @@ from transformers import (
 from src.classifier import Classifier
 
 
-def chat(model, tokenizer, device, classifier=None, max_length: int = 1000):
+def chat(model, tokenizer, device, classifier=None, max_length: int = None):
     """Use model.generate to interact"""
-    model.config.pad_token_id = tokenizer.pad_token_id
+
+    if max_length is None:
+        max_length = model.config.max_length
+
+    model.config.pad_token_id = tokenizer.eos_token_id
     model.to(device)
 
     with open(f"chatlog-{datetime.now().isoformat()}.txt", "w+") as chatlog:
@@ -52,12 +55,7 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = 1000):
             chat_history_ids = model.generate(
                 bot_input_ids,
                 max_length=max_length,
-                pad_token_id=tokenizer.eos_token_id,
-                no_repeat_ngram_size=3,
-                do_sample=True,
-                top_k=100,
-                top_p=0.7,
-                temperature=0.8,
+                # Other args are set in the model.config
             )
 
             response = tokenizer.decode(
@@ -65,8 +63,8 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = 1000):
                 skip_special_tokens=True,
             )
 
-            response = postprocess_text(response)
             chatlog.write(response + "\n")
+            response = postprocess_text(response)
 
             print(f"Bot: {response}")
 
@@ -121,9 +119,9 @@ def postprocess_text(text):
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name", "-m")
-    parser.add_argument("--tokenizer", "-t")
-    parser.add_argument("--config", "-c")
+    parser.add_argument("--model_name", "-m", required=True)
+    parser.add_argument("--tokenizer", "-t", default=None)
+    parser.add_argument("--config", "-c", default=None)
     parser.add_argument("--classifier", "-cf", default=None)
     parser.add_argument("--pipeline", "-p", action="store_true", default=False)
     parser.add_argument(
@@ -144,6 +142,9 @@ def main():
 
     if not args.config:
         args.config = args.model_name
+
+    if not args.tokenizer:
+        args.tokenizer = args.model_name
 
     config = AutoConfig.from_pretrained(args.config)
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
