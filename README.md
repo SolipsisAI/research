@@ -6,6 +6,9 @@ This is a library used for training the models in our apps.
   - [Credits](#credits)
   - [Setup](#setup)
   - [Usage](#usage)
+    - [Trainer](#trainer)
+    - [Export](#export)
+    - [Chat](#chat)
 
 ## Credits
 
@@ -22,6 +25,8 @@ pip install -e .
 
 ## Usage
 
+### Trainer
+
 ```shell
 solipsis-trainer --output_dir=../models/ERICA \
     --data_filename=../data/empathetic_dialogue_processed_train--cleaned128.csv \
@@ -31,4 +36,16 @@ solipsis-trainer --output_dir=../models/ERICA \
     --tokenizer_name="microsoft/DialoGPT-medium" \
     --text_key="text" \
     --num_history=7
+```
+
+### Export
+
+```shell
+solipsis-exporter -m ../models/ERICA -t ../models/ERICA -o ../models/ERICA--exported.tar.gz
+```
+
+### Chat
+
+```shell
+solipsis-chat -m ../models/ERICA -t ../models/ERICA -c ../models/ERICA -cf ../models/distilroberta-finetuned -d "cpu"
 ```
