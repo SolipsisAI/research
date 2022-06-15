@@ -108,10 +108,10 @@ def build_args(default_args: Dict, required_args: List = None):
     return parser.parse_args()
 
 
-def export_model(model_path, output_path):
+def export_model(model_path, tokenizer_path, output_path):
     model = AutoModelForCausalLM.from_pretrained(model_path)
     model.save_pretrained(output_path)
-    tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     tokenizer.save_pretrained(output_path)
     make_tarfile(f"{output_path}.tar.gz", output_path)
     print(f"Saved to {output_path}")

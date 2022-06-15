@@ -28,6 +28,7 @@ setup(
         "console_scripts": [
             "solipsis-trainer=src.main:main",
             "solipsis-chat=src.chat:main",
+            "solipsis-exporter=src.export:main",
         ],
     },
     install_requires=read_requirements_from_dir(REQUIREMENTS_DIR),
