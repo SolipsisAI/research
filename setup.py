@@ -25,7 +25,11 @@ setup(
     version="0.1.0",
     packages=find_packages(include=["src.*"]),
     entry_points={
-        "console_scripts": ["solipsis-trainer=src.main:main"],
+        "console_scripts": [
+            "solipsis-trainer=src.main:main",
+            "solipsis-chat=src.chat:main",
+            "solipsis-exporter=src.export:main",
+        ],
     },
     install_requires=read_requirements_from_dir(REQUIREMENTS_DIR),
 )

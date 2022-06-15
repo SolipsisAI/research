@@ -5,18 +5,25 @@ import os
 import mlflow
 import torch
 from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
+
 from src.args import Args
 from src.train import evaluate, load_and_cache_examples, train
-from src.utils import build_args, set_seed, prepare_data
+from src.utils import build_args, prepare_data, set_seed
+from src.utils import sorted_checkpoints as sort_checkpoints
 
 logger = logging.getLogger(__name__)
 
 
 def run(args):
-    df_trn, df_val = prepare_data(data=args.data_filename, filter_by=args.filter_by)
+    df_trn, df_val = prepare_data(
+        data=args.data_filename,
+        filter_by=args.filter_by,
+        text_key=args.text_key,
+        num_history=args.num_history,
+    )
 
     if args.should_continue:
-        sorted_checkpoints = sorted_checkpoints(args)
+        sorted_checkpoints = sort_checkpoints(args)
         if len(sorted_checkpoints) == 0:
             raise ValueError(
                 "Used --should_continue but no checkpoint was found in --output_dir."
@@ -59,6 +66,18 @@ def run(args):
 
     # Set seed
     set_seed(args)
+
+    if args.config_name is None:
+        logger.info(
+            f"Setting config_name to {args.model_name_or_path} to match {args.model_name_or_path}"
+        )
+        args.config_name = args.model_name_or_path
+
+    if args.tokenizer_name is None:
+        logger.info(
+            f"Setting tokenizer_name to {args.model_name_or_path} to match {args.model_name_or_path}"
+        )
+        args.tokenizer_name = args.model_name_or_path
 
     config = AutoConfig.from_pretrained(args.config_name, cache_dir=args.cache_dir)
     tokenizer = AutoTokenizer.from_pretrained(

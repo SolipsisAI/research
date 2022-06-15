@@ -3,14 +3,14 @@ class Args:
         self.output_dir = None
         self.model_type = "gpt2"
         self.model_name_or_path = "microsoft/DialoGPT-small"
-        self.config_name = "microsoft/DialoGPT-small"
-        self.tokenizer_name = "microsoft/DialoGPT-small"
+        self.config_name = None
+        self.tokenizer_name = None
         self.cache_dir = "cached"
         self.block_size = 512
         self.do_train = True
         self.do_eval = True
         self.evaluate_during_training = False
-        self.per_gpu_train_batch_size = 2
+        self.per_gpu_train_batch_size = 4
         self.per_gpu_eval_batch_size = 2
         self.gradient_accumulation_steps = 1
         self.learning_rate = 5e-5
@@ -33,8 +33,9 @@ class Args:
         self.fp16 = False
         self.fp16_opt_level = "O1"
         self.data_filename = None
-        self.content_key = "content"
+        self.text_key = "text"
         self.filter_by = None
+        self.num_history = 7
 
 
 args = Args()

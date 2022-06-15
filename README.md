@@ -6,6 +6,9 @@ This is a library used for training the models in our apps.
   - [Credits](#credits)
   - [Setup](#setup)
   - [Usage](#usage)
+    - [Trainer](#trainer)
+    - [Export](#export)
+    - [Chat](#chat)
 
 ## Credits
 
@@ -22,12 +25,27 @@ pip install -e .
 
 ## Usage
 
+### Trainer
+
 ```shell
-solipsis-trainer --output_dir ../models/hopperbot-medium \
-    --data_filename ../data/processed.csv \
-    --filter_by "character==bitjockey" \
+solipsis-trainer --output_dir=../models/ERICA \
+    --data_filename=../data/empathetic_dialogue_processed_train--cleaned128.csv \
+    --filter_by="speaker==<s1>" \
     --model_name_or_path="microsoft/DialoGPT-medium" \
     --config_name="microsoft/DialoGPT-medium" \
     --tokenizer_name="microsoft/DialoGPT-medium" \
-    --evaluate_during_training 
+    --text_key="text" \
+    --num_history=7
+```
+
+### Export
+
+```shell
+solipsis-exporter -m ../models/ERICA -t ../models/ERICA -o ../models/ERICA--exported.tar.gz
+```
+
+### Chat
+
+```shell
+solipsis-chat -m ../models/ERICA -t ../models/ERICA -c ../models/ERICA -cf ../models/distilroberta-finetuned -d "cpu"
 ```

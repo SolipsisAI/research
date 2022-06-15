@@ -1,21 +1,40 @@
 import argparse
 import glob
+import logging
+import os.path
 import random
 import re
 import shutil
 import tarfile
-import os.path
-import logging
-
+from pathlib import Path
 from typing import Dict, List, Union
-import numpy as np
 
+import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import torch
+from sklearn.model_selection import train_test_split
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
+
+
+ROOT_DIR = Path(__file__).parent.parent.resolve()
+
+DATA_DIR = ROOT_DIR.joinpath("data")
+
+ID2LABEL_FILEPATH = DATA_DIR.joinpath("id2label.json")
+LABEL2ID_FILEPATH = DATA_DIR.joinpath("label2id.json")
+
+
+def get_speaker(text):
+    results = re.findall(r"^<s\d>", text)
+    return results
+
+
+def clean_text(text):
+    turn_token = "\<\|endoftext\|\>"
+    text = re.sub(r"^<s\d>", "", text)
+    return re.sub(r"{turn_token}$".format(turn_token=turn_token), "", text)
 
 
 def sorted_checkpoints(
@@ -89,10 +108,10 @@ def build_args(default_args: Dict, required_args: List = None):
     return parser.parse_args()
 
 
-def export_model(model_path, output_path):
+def export_model(model_path, tokenizer_path, output_path):
     model = AutoModelForCausalLM.from_pretrained(model_path)
     model.save_pretrained(output_path)
-    tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-small")
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     tokenizer.save_pretrained(output_path)
     make_tarfile(f"{output_path}.tar.gz", output_path)
     print(f"Saved to {output_path}")
@@ -104,8 +123,14 @@ def make_tarfile(output_filename, source_dir):
 
 
 def prepare_data(
-    data: Union[str, pd.DataFrame], filter_by: str = None, content_key="content"
+    data: Union[str, pd.DataFrame],
+    filter_by: str = None,
+    text_key: str = "text",
+    num_history: int = 7,
+    test_size: int = 0.2,
 ):
+    n = int(num_history)
+
     if isinstance(data, str):
         data = pd.read_csv(data)
 
@@ -118,12 +143,11 @@ def prepare_data(
         filter_value = filter_args[1]
 
     contexted = []
-    n = 7
 
     if filter_by:
         indexes = data.loc[data[filter_key] == filter_value].index
     else:
-        indexes = range(n, len(data[content_key]))
+        indexes = range(n, len(data[text_key]))
 
     for i in indexes:
         if filter_key and filter_value and i < n:
@@ -134,14 +158,18 @@ def prepare_data(
             i - 1 - n
         )  # we additionally subtract 1, so row will contain current response and 7 previous responses
         for j in range(i, prev, -1):
-            row.append(data[content_key][j])
+            row.append(data[text_key][j])
         contexted.append(row)
 
     columns = ["response", "context"]
     columns = columns + ["context/" + str(i) for i in range(n - 1)]
 
     df = pd.DataFrame.from_records(contexted, columns=columns)
-    return train_test_split(df, test_size=0.1)
+
+    if test_size is None:
+        return df
+
+    return train_test_split(df, test_size=test_size)
 
 
 def set_seed(args):
