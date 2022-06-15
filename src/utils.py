@@ -6,6 +6,7 @@ import random
 import re
 import shutil
 import tarfile
+from pathlib import Path
 from typing import Dict, List, Union
 
 import numpy as np
@@ -15,6 +16,14 @@ from sklearn.model_selection import train_test_split
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 logger = logging.getLogger(__name__)
+
+
+ROOT_DIR = Path(__file__).parent.parent.resolve()
+
+DATA_DIR = ROOT_DIR.joinpath("data")
+
+ID2LABEL_FILEPATH = DATA_DIR.joinpath("id2label.json")
+LABEL2ID_FILEPATH = DATA_DIR.joinpath("label2id.json")
 
 
 def get_speaker(text):
