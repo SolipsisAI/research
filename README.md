@@ -72,4 +72,7 @@ OR
 
 ```shell
 solipsis-chat -m ../models/ERICA-2024-05-24 -t ../models/ERICA-2024-05-24 -c ../models/ERICA-2024-05-24 -cf ../models/distilroberta-finetuned -d "cpu"
+
+
+solipsis-chat -m notebooks/results -t notebooks/results -c notebooks/results -d "cpu"
 ```
