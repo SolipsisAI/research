@@ -38,6 +38,18 @@ solipsis-trainer --output_dir=../models/ERICA \
     --num_history=7
 ```
 
+OR
+
+```shell
+solipsis-trainer --output_dir=../models/ERICA-2024-05-24 \
+    --data_filename=../data/ed_train__train-cleaned128.csv \
+    --model_name_or_path="microsoft/DialoGPT-medium" \
+    --config_name="microsoft/DialoGPT-medium" \
+    --tokenizer_name="microsoft/DialoGPT-medium" \
+    --text_key="response" \
+    --num_history=7
+```
+
 ### Export
 
 ```shell
