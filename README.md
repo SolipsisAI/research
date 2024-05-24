@@ -56,8 +56,20 @@ solipsis-trainer --output_dir=../models/ERICA-2024-05-24 \
 solipsis-exporter -m ../models/ERICA -t ../models/ERICA -o ../models/ERICA--exported.tar.gz
 ```
 
+OR
+
+```shell
+solipsis-exporter -m ../models/ERICA-2024-05-24 -t ../models/ERICA/ERICA-2024-05-24 -o ../models/ERICA-2024-05-24--exported.tar.gz
+```
+
 ### Chat
 
 ```shell
 solipsis-chat -m ../models/ERICA -t ../models/ERICA -c ../models/ERICA -cf ../models/distilroberta-finetuned -d "cpu"
+```
+
+OR
+
+```shell
+solipsis-chat -m ../models/ERICA-2024-05-24 -t ../models/ERICA-2024-05-24 -c ../models/ERICA-2024-05-24 -cf ../models/distilroberta-finetuned -d "cpu"
 ```
