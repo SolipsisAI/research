@@ -21,6 +21,7 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = None):
         max_length = model.config.max_length
 
     model.config.pad_token_id = tokenizer.eos_token_id
+    model.generation_config.pad_token_ids = tokenizer.pad_token_id
     model.to(device)
 
     with open(f"chatlog-{datetime.now().isoformat()}.txt", "w+") as chatlog:
