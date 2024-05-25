@@ -28,7 +28,7 @@ class Classifier:
         self.pipe.model.config.id2label = read_json(id2label_file, as_type=int)
         self.pipe.model.config.label2id = read_json(label2id_file)
 
-    def classify(self, text, k: int = 1) -> Union[List[Dict], List[str]]:
+    def classify(self, text, k: int = 1, include_score=False) -> Union[List[Dict], List[str]]:
         results = self.pipe(text)
         
         if not results:
@@ -44,4 +44,4 @@ class Classifier:
         results.sort(key=lambda item: item.get("score"), reverse=True)
 
         # Return the top k results
-        return [r["label"] for r in results[:k]]
+        return [r if include_score else r["label"] for r in result[:k]]

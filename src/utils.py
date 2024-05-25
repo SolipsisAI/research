@@ -13,7 +13,11 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import (
+    PreTrainedModel,
+    PreTrainedTokenizer,
+    PretrainedConfig,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +35,11 @@ def get_speaker(text):
     return results
 
 
-def clean_text(text):
+def clean_text(text, replace_comma=False):
     turn_token = "\<\|endoftext\|\>"
     text = re.sub(r"^<s\d>", "", text)
+    if replace_comma:
+        text = re.sub(r"_comma_", ", ", text)
     return re.sub(r"{turn_token}$".format(turn_token=turn_token), "", text)
 
 
@@ -108,11 +114,16 @@ def build_args(default_args: Dict, required_args: List = None):
     return parser.parse_args()
 
 
-def export_model(model_path, tokenizer_path, output_path, autoclass=AutoModelForCausalLM):
-    model = autoclass.from_pretrained(model_path)
+def export_model(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    config: PretrainedConfig,
+    output_path: str,
+):
     model.save_pretrained(output_path)
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    config.save_pretrained(output_path)
     tokenizer.save_pretrained(output_path)
+
     make_tarfile(f"{output_path}.tar.gz", output_path)
     print(f"Saved to {output_path}")
 

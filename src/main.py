@@ -1,14 +1,15 @@
 import glob
 import logging
 import os
+from datetime import datetime
 
 import mlflow
 import torch
 from transformers import WEIGHTS_NAME, AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 from src.args import Args
-from src.train import evaluate, load_and_cache_examples, train
-from src.utils import build_args, prepare_data, set_seed
+from src.train import evaluate, train
+from src.utils import build_args, prepare_data, set_seed, DATA_DIR
 from src.utils import sorted_checkpoints as sort_checkpoints
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,9 @@ def run(args):
         text_key=args.text_key,
         num_history=args.num_history,
     )
+
+    df_trn.to_csv(DATA_DIR.joinpath(f"train__{datetime.now().isoformat()}.csv"))
+    df_val.to_csv(DATA_DIR.joinpath(f"val__{datetime.now().isoformat()}.csv"))
 
     if args.should_continue:
         sorted_checkpoints = sort_checkpoints(args)

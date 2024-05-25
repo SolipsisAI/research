@@ -1,5 +1,6 @@
 import argparse
 import re
+from datetime import datetime
 
 import torch
 from transformers import (
@@ -13,69 +14,78 @@ from transformers import (
 from src.classifier import Classifier
 
 
-def chat(model, tokenizer, device, classifier=None, max_length: int = 1000):
+def chat(model, tokenizer, device, classifier=None, max_length: int = None):
     """Use model.generate to interact"""
-    model.config.pad_token_id = tokenizer.pad_token_id
 
+    if max_length is None:
+        max_length = model.config.max_length
+
+    model.config.pad_token_id = tokenizer.eos_token_id
+    model.generation_config.pad_token_ids = tokenizer.pad_token_id
     model.to(device)
 
-    step = 0
+    with open(f"chatlog-{datetime.now().isoformat()}.txt", "w+") as chatlog:
+        step = 0
+        while True:
+            text = input(">> ")
 
-    while True:
-        text = input(">> ")
-        if text in ["/q", "/quit", "/e", "/exit"]:
-            break
+            if not text:
+                continue
 
-        print(f"User: {text}")
+            if text in ["/q", "/quit", "/e", "/exit"]:
+                break
 
-        new_user_input_ids = tokenizer.encode(
-            preprocess_text(text, classifier=classifier) + tokenizer.eos_token,
-            return_tensors="pt",
-        )
+            print(f"User: {text}")
 
-        # append the new user input tokens to the chat history
-        bot_input_ids = (
-            torch.cat([chat_history_ids, new_user_input_ids], dim=-1)
-            if step > 0
-            else new_user_input_ids
-        )
+            text = preprocess_text(text, classifier=classifier)
+            chatlog.write(text + "\n")
 
-        # generate chat ids
-        chat_history_ids = model.generate(
-            bot_input_ids,
-            max_length=max_length,
-            pad_token_id=tokenizer.eos_token_id,
-            no_repeat_ngram_size=3,
-            do_sample=True,
-            top_k=100,
-            top_p=0.7,
-            temperature=0.8,
-        )
+            new_user_input_ids = tokenizer.encode(
+                text + tokenizer.eos_token,
+                return_tensors="pt",
+            )
 
-        response = tokenizer.decode(
-            chat_history_ids[:, bot_input_ids.shape[-1] :][0],
-            skip_special_tokens=True,
-        )
+            # append the new user input tokens to the chat history
+            bot_input_ids = (
+                torch.cat([chat_history_ids, new_user_input_ids], dim=-1)
+                if step > 0
+                else new_user_input_ids
+            )
 
-        print(f"Bot: {postprocess_text(response)}")
+            # generate chat ids
+            chat_history_ids = model.generate(
+                bot_input_ids,
+                max_length=max_length,
+                # Other args are set in the model.config
+            )
+
+            response = tokenizer.decode(
+                chat_history_ids[:, bot_input_ids.shape[-1] :][0],
+                skip_special_tokens=True,
+            )
+
+            chatlog.write(response + "\n")
+            response = postprocess_text(response)
+
+            print(f"Bot: {response}")
 
 
 def chat_pipeline(model, tokenizer, classifier=None, device=None, max_length=1000):
-    conversation = Conversation()
     pipe = ConversationalPipeline(
         model=model,
         tokenizer=tokenizer,
         device=-1 if device == "cpu" else device,
     )
-    pipe.model.config.pad_token_id = pipe.tokenizer.eos_token_id
-    pipe.model.max_length = max_length
+
+    # Override the max_length. Other config is set in the model itself.
+    pipe.model.config.max_length = max_length
 
     while True:
         text = input(">> ")
         if text in ["/q", "/quit", "/e", "/exit"]:
             break
 
-        conversation.add_user_input(preprocess_text(text, classifier=classifier))
+        conversation = Conversation(preprocess_text(text, classifier=classifier))
 
         print(f"User: {text}")
 
@@ -96,16 +106,16 @@ def preprocess_text(text, classifier=None):
 
 def postprocess_text(text):
     """Clean response text"""
-    text = re.sub(r"^\w+", "", text)
+    text = re.sub(r"^\w+\s", "", text)
     return re.sub(r"_comma_", ",", text)
 
 
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_name", "-m")
-    parser.add_argument("--tokenizer", "-t")
-    parser.add_argument("--config", "-c")
+    parser.add_argument("--model_name", "-m", required=True)
+    parser.add_argument("--tokenizer", "-t", default=None)
+    parser.add_argument("--config", "-c", default=None)
     parser.add_argument("--classifier", "-cf", default=None)
     parser.add_argument("--pipeline", "-p", action="store_true", default=False)
     parser.add_argument(
@@ -127,6 +137,9 @@ def main():
     if not args.config:
         args.config = args.model_name
 
+    if not args.tokenizer:
+        args.tokenizer = args.model_name
+
     config = AutoConfig.from_pretrained(args.config)
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
 
@@ -138,4 +151,10 @@ def main():
 
     chat_fn = chat_pipeline if args.pipeline else chat
 
-    chat_fn(model, tokenizer, classifier=classifier, device=args.device, max_length=args.max_length)
+    chat_fn(
+        model,
+        tokenizer,
+        classifier=classifier,
+        device=args.device,
+        max_length=args.max_length,
+    )
