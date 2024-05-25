@@ -38,14 +38,14 @@ solipsis-trainer --output_dir=../models/ERICA \
     --num_history=7
 ```
 
-OR
+OR for contexted chats:
 
 ```shell
 solipsis-trainer --output_dir=../models/hopperbot-2024-05-24 \
     --data_filename=../data/preprocessed_hopperbot_train.csv \
-    --model_name_or_path="microsoft/DialoGPT-medium" \
-    --config_name="microsoft/DialoGPT-medium" \
-    --tokenizer_name="microsoft/DialoGPT-medium" \
+    --model_name_or_path="microsoft/DialoGPT-small" \
+    --config_name="microsoft/DialoGPT-small" \
+    --tokenizer_name="microsoft/DialoGPT-small" \
     --text_key="content" \
     --num_history=7
 ```
@@ -59,7 +59,7 @@ solipsis-exporter -m ../models/ERICA -t ../models/ERICA -o ../models/ERICA--expo
 OR
 
 ```shell
-solipsis-exporter -m ../models/ERICA-2024-05-24 -t ../models/ERICA/ERICA-2024-05-24 -o ../models/ERICA-2024-05-24--exported.tar.gz
+solipsis-exporter -m ../models/hopperbot-2024-05-24 -t ../models/hopperbot-2024-05-24 -o ../models/hopperbot-2024-05-24--exported.tar.gz
 ```
 
 ### Chat
@@ -74,5 +74,5 @@ OR
 solipsis-chat -m ../models/ERICA-2024-05-24 -t ../models/ERICA-2024-05-24 -c ../models/ERICA-2024-05-24 -cf ../models/distilroberta-finetuned -d "cpu"
 
 
-solipsis-chat -m notebooks/results -t notebooks/results -c notebooks/results -d "cpu"
+solipsis-chat -m ../models/hopperbot-2024-05-24 -t ../models/hopperbot-2024-05-24 -c ../models/hopperbot-2024-05-24 -d "cpu"
 ```
