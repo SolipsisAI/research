@@ -41,12 +41,12 @@ solipsis-trainer --output_dir=../models/ERICA \
 OR
 
 ```shell
-solipsis-trainer --output_dir=../models/ERICA-2024-05-24 \
-    --data_filename=../data/ed_train__train-cleaned128.csv \
+solipsis-trainer --output_dir=../models/hopperbot-2024-05-24 \
+    --data_filename=../data/preprocessed_hopperbot_train.csv \
     --model_name_or_path="microsoft/DialoGPT-medium" \
     --config_name="microsoft/DialoGPT-medium" \
     --tokenizer_name="microsoft/DialoGPT-medium" \
-    --text_key="response" \
+    --text_key="content" \
     --num_history=7
 ```
 
