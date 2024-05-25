@@ -38,7 +38,7 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = None):
             print(f"User: {text}")
 
             text = preprocess_text(text, classifier=classifier)
-            chatlog.write(text + "\n")
+            chatlog.write("User: " + text + "\n")
 
             new_user_input_ids = tokenizer.encode(
                 text + tokenizer.eos_token,
@@ -64,8 +64,8 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = None):
                 skip_special_tokens=True,
             )
 
-            chatlog.write(response + "\n")
-            response = postprocess_text(response)
+            chatlog.write("Bot:" + response + "\n")
+            response = postprocess_text(response, classifier=classifier)
 
             print(f"Bot: {response}")
 
@@ -80,19 +80,25 @@ def chat_pipeline(model, tokenizer, classifier=None, device=None, max_length=100
     # Override the max_length. Other config is set in the model itself.
     pipe.model.config.max_length = max_length
 
-    while True:
-        text = input(">> ")
-        if text in ["/q", "/quit", "/e", "/exit"]:
-            break
+    with open(f"chatlog-{datetime.now().isoformat()}.txt", "w+") as chatlog:
+        while True:
+            text = input(">> ")
+            if text in ["/q", "/quit", "/e", "/exit"]:
+                break
 
-        conversation = Conversation(preprocess_text(text, classifier=classifier))
+            chatlog.write("User: " + text + "\n")
+            conversation = Conversation(preprocess_text(text, classifier=classifier))
 
-        print(f"User: {text}")
+            print(f"User: {text}")
 
-        result = pipe(conversation)
-        response = result.generated_responses[-1]
+            result = pipe(conversation)
+            response = result.generated_responses[-1]
 
-        print(f"Bot: {postprocess_text(response)}")
+            chatlog.write("Bot: " + response + "\n")
+
+            postprocessed_text = postprocess_text(response, classifier=classifier)
+
+            print(f"Bot: {postprocessed_text}")
 
 
 def preprocess_text(text, classifier=None):
@@ -104,9 +110,10 @@ def preprocess_text(text, classifier=None):
     return f"{prefix}{text}"
 
 
-def postprocess_text(text):
+def postprocess_text(text, classifier=None):
     """Clean response text"""
-    text = re.sub(r"^\w+\s", "", text)
+    if classifier:
+        text = re.sub(r"^\w+\s", "", text)
     return re.sub(r"_comma_", ",", text)
 
 

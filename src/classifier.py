@@ -33,15 +33,16 @@ class Classifier:
         
         if not results:
             return
-        
-        results.sort(key=lambda item: item.get("score"), reverse=True)
+            
+        scores = results[0] 
+        scores.sort(key=lambda item: item.get("score"), reverse=True)
 
         # Return all the results
         if k < 1:
-            return results
+            return scores
 
         # Sort by score, in descending order
-        results.sort(key=lambda item: item.get("score"), reverse=True)
+        scores.sort(key=lambda item: item.get("score"), reverse=True)
 
         # Return the top k results
-        return [r if include_score else r["label"] for r in result[:k]]
+        return [r if include_score else r["label"] for r in scores[:k]]

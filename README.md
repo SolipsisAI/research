@@ -74,5 +74,5 @@ OR
 solipsis-chat -m ../models/ERICA-2024-05-24 -t ../models/ERICA-2024-05-24 -c ../models/ERICA-2024-05-24 -cf ../models/distilroberta-finetuned -d "cpu"
 
 
-solipsis-chat -m ../models/hopperbot-2024-05-24 -t ../models/hopperbot-2024-05-24 -c ../models/hopperbot-2024-05-24 -d "cpu"
+solipsis-chat -m ../models/hopperbot-2024-05-24-medium -t ../models/hopperbot-2024-05-24-medium -c ../models/hopperbot-2024-05-24-medium -d "cpu"
 ```
