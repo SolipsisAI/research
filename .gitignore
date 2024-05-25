@@ -162,3 +162,6 @@ cached/
 runs/
 models/
 data/
+log/
+chatlogs/
+mlruns/
