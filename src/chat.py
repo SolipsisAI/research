@@ -2,6 +2,8 @@ import argparse
 import re
 from datetime import datetime
 
+from pathlib import Path
+
 import torch
 from transformers import (
     AutoConfig,
@@ -14,7 +16,7 @@ from transformers import (
 from src.classifier import Classifier
 
 
-def chat(model, tokenizer, device, classifier=None, max_length: int = None):
+def chat(model, tokenizer, output_dir, classifier=None, device="cuda", max_length: int = None):
     """Use model.generate to interact"""
 
     if max_length is None:
@@ -24,7 +26,8 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = None):
     model.generation_config.pad_token_ids = tokenizer.pad_token_id
     model.to(device)
 
-    with open(f"chatlog-{datetime.now().isoformat()}.txt", "w+") as chatlog:
+    output_filepath = Path(output_dir).joinpath(f"chatlog-{datetime.now().isoformat()}.txt")
+    with open(output_filepath, "w+") as chatlog:
         step = 0
         while True:
             text = input(">> ")
@@ -70,7 +73,7 @@ def chat(model, tokenizer, device, classifier=None, max_length: int = None):
             print(f"Bot: {response}")
 
 
-def chat_pipeline(model, tokenizer, classifier=None, device=None, max_length=1000):
+def chat_pipeline(model, tokenizer, output_dir, classifier=None, device="cuda", max_length=1000):
     pipe = ConversationalPipeline(
         model=model,
         tokenizer=tokenizer,
@@ -79,8 +82,9 @@ def chat_pipeline(model, tokenizer, classifier=None, device=None, max_length=100
 
     # Override the max_length. Other config is set in the model itself.
     pipe.model.config.max_length = max_length
-
-    with open(f"chatlog-{datetime.now().isoformat()}.txt", "w+") as chatlog:
+    
+    output_filepath = Path(output_dir).joinpath(f"chatlog-{datetime.now().isoformat()}.txt")
+    with open(output_filepath, "w+") as chatlog:
         while True:
             text = input(">> ")
             if text in ["/q", "/quit", "/e", "/exit"]:
@@ -120,6 +124,7 @@ def postprocess_text(text, classifier=None):
 def main():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("--output_dir", "-o", required=True)
     parser.add_argument("--model_name", "-m", required=True)
     parser.add_argument("--tokenizer", "-t", default=None)
     parser.add_argument("--config", "-c", default=None)
@@ -158,10 +163,13 @@ def main():
 
     chat_fn = chat_pipeline if args.pipeline else chat
 
+    print(f"Using device {args.device}")
+
     chat_fn(
         model,
         tokenizer,
+        args.output_dir,
+        device=args.device, 
         classifier=classifier,
-        device=args.device,
         max_length=args.max_length,
     )
